@@ -1,0 +1,211 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+}
+
+body {
+    background: #000000;
+    min-height: 100vh;
+    overflow: hidden;
+    font-family: 'Poppins', sans-serif;
+    color: white;
+    position: relative;
+    user-select: none;
+}
+
+h1, h2, h3, h4, h5, h6 { 
+    font-family: 'Space Mono', monospace;
+}
+
+.initial-blur {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(20px);
+    z-index: 1000;
+    pointer-events: none;
+    animation: unblur 1.5s ease-out forwards;
+}
+
+@keyframes unblur {
+    0% {
+        backdrop-filter: blur(20px);
+        opacity: 1;
+    }
+    100% {
+        backdrop-filter: blur(0px);
+        opacity: 100;
+    }
+}
+
+.star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    pointer-events: none;
+    transition: transform 0.1s ease;
+    opacity: 0;
+    animation: fadeIn 1.5s ease-out forwards;
+    box-shadow: 0 0 10px 2px rgba(255, 255, 255, 1 );
+    filter: brightness(2);
+}
+
+@keyframes twinkle {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.content-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(5px);
+    border-radius: 15px;
+    width: 80%;
+    max-width: 600px;
+    text-align: center;
+    opacity: 100;
+    animation: fadeIn 1.5s ease-out 0.75s forwards;
+}
+
+h1 {
+    margin-bottom: 1rem;
+    font-size: 2.5rem;
+}
+
+p {
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.parallax-container {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    perspective: 1000px;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+}
+
+.social-button {
+    color: white;
+    text-decoration: none;
+    font-size: 2rem;
+    transition: all 0.3s ease;
+}
+
+.social-button:hover {
+    transform: scale(1.2);
+}
+
+.roblox-icon {
+    width: 2rem;
+    height: 2rem;
+    transition: transform 0.3s ease;
+}
+
+.roblox-icon:hover {
+    transform: scale(1.2);
+}
+
+.profile-picture {
+    position: absolute;
+    top: -4rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    z-index: 3; 
+}
+
+.profile-picture img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.go-back-button, .no-hello-link {
+    position: absolute;
+    bottom: 1rem;
+    font-size: 0.9rem;
+    background-color: transparent;
+}
+
+.go-back-button {
+    left: 1rem;
+}
+
+.no-hello-link {
+    right: 1rem;
+}
+
+.go-back-button a, .no-hello-link a {
+    font-size: 1rem;
+    padding: 5px 10px;
+    color: white;
+    background-color: transparent;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-weight: bold;
+}
+
+.go-back-button a:hover, .no-hello-link a:hover {
+    transform: scale(1.1);
+    text-decoration: none; 
+    color: #ffe1ff;
+}
+
+.music-button {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background-color: transparent;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    z-index: 1001;
+    transition: transform 0.2s;
+}
+
+.music-button:hover {
+    transform: scale(1.1);
+}
+.click-to-enter-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    z-index: 2000; 
+    font-size: 2rem; 
+    opacity: 1; 
+    transition: opacity 0.5s ease;
+}
+
+.click-to-enter-overlay h2 {
+    margin: 0; 
+}
+
+#click-to-enter-overlay {
+    display: flex;
+}
