@@ -1,9 +1,5 @@
 user-agent: *
 
 disallow: *.ashx
-disallow: /assets/*
-disallow: /v2/*
-disallow: /scripts/*
-disallow: /files/*
 
 Sitemap: https://sillybonus.lol/sitemap.xml
