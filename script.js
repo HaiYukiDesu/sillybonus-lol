@@ -1,5 +1,5 @@
 let isMuted = true;
-let audio = new Audio('https://cdn.hugebonus.xyz/assets/backgroundsound.mp3');
+let audio = new Audio('https://cdn.sillybonus.lol/assets/backgroundsound.mp3');
 const overlay = document.getElementById('click-to-enter-overlay');
 const musicToggle = document.getElementById('music-toggle');
 
