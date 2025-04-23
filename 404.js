@@ -70,7 +70,7 @@ function addSecondButton() {
         link.style.right = '20px'; 
         link.style.fontSize = '0.5rem'; 
         link.onclick = function () {
-            window.location.href = 'https://hugebonus.xyz/Eternity/Void/'; 
+            window.location.href = 'https://sillybonus.lol/Eternity/Void/'; 
         };
         document.body.appendChild(link);
     }, 15000);
