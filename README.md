@@ -1,4 +1,4 @@
-# **Github Repository for hugebonus.xyz**
+# **Github Repository for sillybonus.lol**
 **About this website**
 
 this is my silly website made to put in my code, skidded code(pls don't be serious about this one), and learning to code
