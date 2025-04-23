@@ -72,7 +72,7 @@ document.getElementById('go-back-button').addEventListener('click', () => {
 });
 
 document.getElementById('no-hello-link').addEventListener('click', () => {
-    window.open('https://hugebonus.xyz/nohello', '_blank');
+    window.open('https://sillybonus.lol/nohello', '_blank');
 });
 
 document.addEventListener('mousemove', (e) => {
