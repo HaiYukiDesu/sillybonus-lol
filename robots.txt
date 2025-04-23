@@ -6,4 +6,4 @@ disallow: /v2/*
 disallow: /scripts/*
 disallow: /files/*
 
-Sitemap: https://hugebonus.xyz/sitemap.xml
+Sitemap: https://sillybonus.lol/sitemap.xml
