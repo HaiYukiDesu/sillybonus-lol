@@ -55,25 +55,9 @@ function addGoBackLink() {
             window.history.back();
         };
         document.getElementById("typing-text").appendChild(link);
-        addSecondButton();
-    }, 1500);
+    });
 }
 
-function addSecondButton() {
-    setTimeout(() => {
-        const link = document.createElement('span');
-        link.innerText = '???';
-        link.style.color = 'white'; 
-        link.style.cursor = 'pointer'; 
-        link.style.position = 'fixed'; 
-        link.style.bottom = '20px'; 
-        link.style.right = '20px'; 
-        link.style.fontSize = '0.5rem'; 
-        link.onclick = function () {
-            window.location.href = 'https://sillybonus.lol/Eternity/Void/'; 
-        };
-        document.body.appendChild(link);
-    }, 15000);
-}
+
 
 window.onload = typeHeading;
