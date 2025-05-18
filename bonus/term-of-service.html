@@ -2,78 +2,253 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta content="Terms of Service - Bonus" property="og:title" />
-    <meta content="Terms of Service for the sillybonus.lol website and Discord services." property="og:description" />
-    <meta content="https://sillybonus.lol/tos" property="og:url" />
-    <meta content="https://cdn.sillybonus.lol/assets/kanade.jpg" property="og:image" />
-    <meta content="#2e6dff" data-react-helmet="true" name="theme-color" />
-
-    <title>Terms of Service - Bonus</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="https://cdn.sillybonus.lol/assets/kanade.ico">
+    <title>Bonus's TOS Zone</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&family=Space+Mono&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a2e1f1f6c4.js" crossorigin="anonymous"></script>
     <style>
-        .tos-fullscreen {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: #000000;
+            min-height: 100vh;
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif;
+            color: white;
+            position: relative;
+            user-select: none;
+        }
+
+        h1, h2, h3, h4, h5, h6 { 
+            font-family: 'Space Mono', monospace;
+        }
+
+        .initial-blur {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
-            overflow-y: scroll;
-            padding: 4rem 2rem;
-            background-color: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(20px);
-            z-index: 999;
-            color: white;
+            width: 100%;
+            height: 100%;
+            backdrop-filter: blur(35px); /* Increased blur */
+            z-index: 1000;
+            pointer-events: none;
+            animation: unblur 1.5s ease-out forwards;
         }
 
-        .tos-fullscreen h1, .tos-fullscreen h2 {
-            color: #2e6dff;
+        @keyframes unblur {
+            0% { backdrop-filter: blur(35px); opacity: 1; }
+            100% { backdrop-filter: blur(0px); opacity: 100; }
         }
 
-        .tos-fullscreen ul {
-            padding-left: 1.5rem;
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            transition: transform 0.1s ease;
+            opacity: 0;
+            animation: fadeIn 1.5s ease-out forwards;
+            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 1);
+            filter: brightness(2);
         }
 
-        .tos-fullscreen p, .tos-fullscreen li {
+        @keyframes twinkle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .content-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            padding: 3rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            width: 90%;
+            max-width: 900px;
+            text-align: center;
+            opacity: 100;
+            animation: fadeIn 1.5s ease-out 0.75s forwards;
+        }
+
+        h1 {
             margin-bottom: 1rem;
+            font-size: 3rem;
+        }
+
+        p {
             line-height: 1.6;
+            margin-bottom: 1rem;
         }
 
-        .tos-fullscreen::-webkit-scrollbar {
-            width: 8px;
+        .parallax-container {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            perspective: 1000px;
         }
 
-        .tos-fullscreen::-webkit-scrollbar-thumb {
-            background-color: #2e6dff;
-            border-radius: 10px;
+        .music-button {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background-color: transparent;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            z-index: 1001;
+            transition: transform 0.2s;
+        }
+
+        .music-button:hover {
+            transform: scale(1.1);
+        }
+
+        .click-to-enter-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: flex;
+            justify-content: center; 
+            align-items: center; 
+            z-index: 2000; 
+            font-size: 2rem; 
+            opacity: 1; 
+            transition: opacity 0.5s ease;
+        }
+
+        .click-to-enter-overlay h2 {
+            margin: 0; 
+        }
+
+        #click-to-enter-overlay {
+            display: flex;
         }
     </style>
 </head>
 <body>
-    <div class="tos-fullscreen">
-        <h1>Terms of Service</h1>
-        <p><strong>Effective Date:</strong> May 18, 2025</p>
+    <div class="parallax-container" id="stars-container"></div>
 
-        <h2>1. Use of Service</h2>
-        <p>You agree to use the services provided by Bonus (including Discord bots and website features) in accordance with all applicable laws and regulations. Misuse or abuse of any part of the system is not tolerated.</p>
-
-        <h2>2. Prohibited Activities</h2>
-        <ul>
-            <li>Tampering with, reverse engineering, or attempting to bypass protections of the service</li>
-            <li>Using the bot or website for illegal or malicious activities</li>
-            <li>Overloading, spamming, or otherwise interfering with service operation</li>
-        </ul>
-
-        <h2>3. Availability</h2>
-        <p>The service may become unavailable at any time due to maintenance, technical issues, or discontinuation. We do not guarantee uptime or uninterrupted access.</p>
-
-        <h2>4. Termination</h2>
-        <p>We reserve the right to terminate access to our services without notice if these terms are violated.</p>
-
-        <h2>5. Modifications</h2>
-        <p>We may update these Terms at any time. Continued use of the service after changes implies acceptance of the new terms.</p>
-
-        <p>For questions, contact us via <a href="https://discord.com/users/633112741426495488" target="_blank">Discord</a>.</p>
+    <div class="click-to-enter-overlay" id="click-to-enter-overlay">
+        <h2>Click to Enter</h2>
     </div>
+
+    <button id="music-toggle" class="music-button"><i class="fas fa-volume-mute"></i></button>
+
+    <div class="initial-blur"></div>
+
+    <div class="content-container">
+        <h1>Terms of Service</h1>
+        <p>
+            Welcome to Bonus's zone! By entering this site, you agree not to be a boring potato. 
+            All content is for fun, learning, and chaotic cosmic vibes only.
+            Don't steal stuff, don't bully the stars, and don't DM me about NFTs.
+        </p>
+        <p>
+            You also agree that clicking shiny buttons may or may not bring joy, explosions, or 
+            a sudden craving for ramen. I hold the right to update these terms while listening to 
+            J-pop and sipping bubble tea.
+        </p>
+        <p>
+            By continuing to orbit this page, you accept that you're now part of the intergalactic 
+            Bonus-verse. Welcome aboard, space traveler.
+        </p>
+    </div>
+
+    <script>
+        let isMuted = true;
+        let audio = new Audio('https://cdn.sillybonus.lol/assets/backgroundsound.mp3');
+        const overlay = document.getElementById('click-to-enter-overlay');
+        const musicToggle = document.getElementById('music-toggle');
+
+        overlay.addEventListener('click', function () {
+            if (isMuted) {
+                audio.play();
+                isMuted = false;
+            }
+            overlay.style.display = 'none';
+        });
+
+        musicToggle.addEventListener('click', function () {
+            const icon = musicToggle.querySelector('i');
+
+            if (isMuted) {
+                audio.play();
+                icon.classList.remove('fa-volume-mute');
+                icon.classList.add('fa-volume-up');
+                isMuted = false;
+            } else {
+                audio.pause();
+                icon.classList.remove('fa-volume-up');
+                icon.classList.add('fa-volume-mute');
+                isMuted = true;
+            }
+        });
+
+        setTimeout(() => {
+            initializeStars();
+        }, 100);
+
+        function initializeStars() {
+            function createStar() {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const size = Math.random() * 4 + 2;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                const animationDuration = Math.random() * 3 + 2;
+                star.style.animation = `fadeIn 1.5s ease-out forwards, twinkle ${animationDuration}s ease-in-out infinite`;
+                document.getElementById('stars-container').appendChild(star);
+                let yPos = parseFloat(star.style.top);
+                setInterval(() => {
+                    yPos -= 0.05;
+                    if (yPos < -5) {
+                        yPos = 105;
+                        star.style.left = `${Math.random() * 100}%`;
+                    }
+                    star.style.top = `${yPos}%`;
+                }, 50);
+                return star;
+            }
+
+            for (let i = 0; i < 100; i++) {
+                createStar();
+            }
+
+            setInterval(() => {
+                if (document.getElementsByClassName('star').length < 150) {
+                    createStar();
+                }
+            }, 1000);
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            const container = document.getElementById('stars-container');
+            const stars = document.getElementsByClassName('star');
+            const mouseX = (e.clientX / window.innerWidth - 0.5) * 20;
+            const mouseY = (e.clientY / window.innerHeight - 0.5) * 20;
+
+            for (let star of stars) {
+                const depth = Math.random() * 0.5 + 0.5;
+                const translateX = mouseX * depth;
+                const translateY = mouseY * depth;
+                star.style.transform = `translate(${translateX}px, ${translateY}px)`;
+            }
+        });
+    </script>
 </body>
 </html>
