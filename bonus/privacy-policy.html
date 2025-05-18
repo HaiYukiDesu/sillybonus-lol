@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bonus's Privacy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&family=Space+Mono&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a2e1f1f6c4.js" crossorigin="anonymous"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: #000000;
+            min-height: 100vh;
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif;
+            color: white;
+            position: relative;
+            user-select: none;
+        }
+
+        h1, h2, h3, h4, h5, h6 { 
+            font-family: 'Space Mono', monospace;
+        }
+
+        .initial-blur {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backdrop-filter: blur(35px);
+            z-index: 1000;
+            pointer-events: none;
+            animation: unblur 1.5s ease-out forwards;
+        }
+
+        @keyframes unblur {
+            0% { backdrop-filter: blur(35px); opacity: 1; }
+            100% { backdrop-filter: blur(0px); opacity: 100; }
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            transition: transform 0.1s ease;
+            opacity: 0;
+            animation: fadeIn 1.5s ease-out forwards;
+            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 1);
+            filter: brightness(2);
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .content-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            padding: 3rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            width: 90%;
+            max-width: 900px;
+            text-align: center;
+            opacity: 100;
+            animation: fadeIn 1.5s ease-out 0.75s forwards;
+        }
+
+        h1 {
+            margin-bottom: 1rem;
+            font-size: 3rem;
+        }
+
+        p {
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .parallax-container {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            perspective: 1000px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="parallax-container" id="stars-container"></div>
+
+    <div class="initial-blur"></div>
+
+    <div class="content-container">
+        <h1>Privacy Policy</h1>
+        <p>
+            Privacy Policy
+        </p>
+        <p>
+            Effective Date: May 18 2025
+        </p>
+        <p>
+            This Privacy Policy outlines the types of data collected and how it is used.
+        </p>
+        <h4>
+        1. Data Collected
+        </h4>
+        <p>
+        We collect the following data:
+        
+        • User ID (Discord snowflake)
+        
+        • Username (including discriminator, e.g. Bonus#0000)
+        
+        • Command Usage Logs (which commands were used and when)
+        <p>
+        <h4>
+        2. Purpose of Data Collection
+        </h4>
+        <p>
+        • The data is collected solely for the following purposes:
+        
+        • Monitoring and preventing abuse of the Service
+        
+        • Tracking usage statistics for improvements
+        
+        • Diagnosing and resolving issues
+        </p>
+        <h4>
+        3. Data Retention
+        </h4>
+        <p>
+        Data is retained for as long as necessary to fulfill the purposes outlined above. We may periodically purge older data to reduce storage and improve performance.
+        </p>
+        <h4>
+        4. Data Sharing
+        </h4>
+        <p>
+        We do not sell, share, or disclose user data to any third parties, except as required by law or legal request.
+        </p>
+        <h4>
+        5. Security
+        </h4>
+        <p>
+        Reasonable measures are taken to protect data from unauthorized access, modification, or disclosure. However, no system is entirely secure, and we cannot guarantee absolute data security.
+        </p>
+        <h4>
+        6. Your Rights
+        </h4>
+        <p>
+        Users may request to view or delete their data by contacting the owner of the Service. We will process such requests within a reasonable timeframe.
+        </p>
+        <p>
+            For any questions regarding the Privacy Policy, please contact us at: 
+            <a href="mailto:privacy@sillybonus.lol">privacy@sillybonus.lol</a>
+        </p>
+    </div>
+
+    <script>
+
+        setTimeout(() => {
+            initializeStars();
+        }, 100);
+
+        function initializeStars() {
+            function createStar() {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const size = Math.random() * 4 + 2;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                const animationDuration = Math.random() * 3 + 2;
+                star.style.animation = `fadeIn 1.5s ease-out forwards, twinkle ${animationDuration}s ease-in-out infinite`;
+                document.getElementById('stars-container').appendChild(star);
+                let yPos = parseFloat(star.style.top);
+                setInterval(() => {
+                    yPos -= 0.05;
+                    if (yPos < -5) {
+                        yPos = 105;
+                        star.style.left = `${Math.random() * 100}%`;
+                    }
+                    star.style.top = `${yPos}%`;
+                }, 50);
+                return star;
+            }
+
+            for (let i = 0; i < 100; i++) {
+                createStar();
+            }
+
+            setInterval(() => {
+                if (document.getElementsByClassName('star').length < 150) {
+                    createStar();
+                }
+            }, 1000);
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            const container = document.getElementById('stars-container');
+            const stars = document.getElementsByClassName('star');
+            const mouseX = (e.clientX / window.innerWidth - 0.5) * 20;
+            const mouseY = (e.clientY / window.innerHeight - 0.5) * 20;
+
+            for (let star of stars) {
+                const depth = Math.random() * 0.5 + 0.5;
+                const translateX = mouseX * depth;
+                const translateY = mouseY * depth;
+                star.style.transform = `translate(${translateX}px, ${translateY}px)`;
+            }
+        });
+    </script>
+</body>
+</html>
