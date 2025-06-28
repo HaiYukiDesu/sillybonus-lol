@@ -1,0 +1,100 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #121212;
+    color: #e0e0e0;
+    margin: 0;
+    padding: 20px;
+}
+
+.main-title {
+    text-align: center;
+    color: #ffffff;
+    margin-bottom: 30px;
+}
+
+#tree-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #1e1e1e;
+    border: 1px solid #333333;
+    border-radius: 8px;
+    padding: 10px 20px;
+    line-height: 1.5;
+}
+
+.tree ul {
+    list-style-type: none;
+    padding-left: 20px;
+}
+
+.tree li {
+    padding: 4px 0;
+}
+
+.tree .folder {
+    cursor: pointer;
+    font-weight: bold;
+    user-select: none;
+    color: #58a6ff;
+}
+
+.tree .folder:hover {
+    color: #80bfff;
+}
+
+.tree .folder::before {
+    content: '▶';
+    display: inline-block;
+    margin-right: 8px;
+    font-size: 0.8em;
+    transition: transform 0.2s ease-in-out;
+    color: #8b949e;
+}
+
+.tree .folder.open::before {
+    transform: rotate(90deg);
+}
+
+.tree .nested {
+    display: none;
+}
+
+.tree .folder.open + .nested {
+    display: block;
+}
+
+.tree .item {
+    padding-left: 18px;
+    color: #c9d1d9;
+}
+
+.tree .details-key {
+    color: #8b949e;
+    font-weight: 600;
+}
+
+.tree .details-value {
+    color: #c9d1d9;
+}
+
+.credits {
+    text-align: center;
+    margin-top: 40px;
+    padding-bottom: 20px;
+    color: #8b949e;
+    font-size: 0.9em;
+}
+
+.credits p {
+    margin: 5px 0;
+}
+
+.credits a {
+    color: #58a6ff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.credits a:hover {
+    text-decoration: underline;
+}
