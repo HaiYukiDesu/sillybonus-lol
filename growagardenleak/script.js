@@ -104,12 +104,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     "Golden Bee": parsedData["Golden Bee"]
                 }
             },
-            "Mutation": {
+            "Mutations": {
                 "Cloudtouched": parsedData["cloudtouched"],
                 "Fried": parsedData["fried"],
                 "Aurora": parsedData["aurora"],
                 "Wiltproof": parsedData["wiltproof"],
                 "Drenched": parsedData["drenched"],
+            },
+            "Events": {
+                "New Events": parsedData["NewEvent"]
             }
         }
     };
