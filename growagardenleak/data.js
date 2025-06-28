@@ -657,6 +657,14 @@
 		};
         ],
 
+        "NewEvent": [
+        Aurora Bolealis = Aurora Mutation
+        Drought = Unknown
+        Solarflare = Unknown
+        Tropical Rain = Unknown
+        Under The Sea = Wet Mutation
+        ],
+
         "cloudtouched": [
         Multiplier = 5
         ],
