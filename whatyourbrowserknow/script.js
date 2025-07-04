@@ -1,4 +1,4 @@
-let socket,isOnline=false,isReconnecting=false,heartbeatInterval,cachedDataElements=[]
+let socket,isOnline=false,heartbeatInterval,cachedDataElements=[]
 
 document.getElementById("accept-disclaimer-button").addEventListener("click",async()=>{
     document.getElementById("click-to-enter-overlay").style.opacity=0
@@ -80,7 +80,6 @@ function startSocketHeartbeat(){
     socket=new WebSocket("wss://ws.sillybonus.lol")
     socket.onopen=()=>{
         isOnline=true
-        isReconnecting=false
         clearInterval(heartbeatInterval)
         heartbeatInterval=setInterval(()=>{
             if(socket.readyState===WebSocket.OPEN)socket.send("ping")
@@ -92,12 +91,9 @@ function startSocketHeartbeat(){
 }
 
 function handleSocketClose(){
-    if(!isReconnecting){
-        isOnline=false
-        isReconnecting=true
-        clearInterval(heartbeatInterval)
-        setTimeout(startSocketHeartbeat,5000)
-    }
+    isOnline = false;
+    clearInterval(heartbeatInterval);
+    setTimeout(startSocketHeartbeat, 5000);
 }
 
 function getConnectionType(){
