@@ -124,16 +124,20 @@ async function getBatteryStatus() {
     return `${Math.round(b.level * 100)}% (${b.charging ? "Charging" : "Not Charging"})`;
 }
 
-function getCanvasFingerprint() {
-    const c = document.createElement("canvas");
-    const x = c.getContext("2d");
-    x.textBaseline = "top";
-    x.font = "14px 'Arial'";
-    x.fillStyle = "#f60";
-    x.fillRect(0, 0, 100, 30);
-    x.fillStyle = "#069";
-    x.fillText("Browser Fingerprint", 2, 2);
-    return c.toDataURL().slice(0, 25) + "...";
+async function getCanvasFingerprint() {
+    try {
+        const c = document.createElement("canvas");
+        const x = c.getContext("2d");
+        x.textBaseline = "top";
+        x.font = "14px 'Arial'";
+        x.fillStyle = "#f60";
+        x.fillRect(0, 0, 100, 30);
+        x.fillStyle = "#069";
+        x.fillText("Internet Footprint", 2, 2);
+        return c.toDataURL().slice(0, 25) + "...";
+    } catch (e) {
+        return "Unavailable";
+    }
 }
 
 function initializeStars() {
