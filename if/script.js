@@ -8,6 +8,7 @@ const leftArrow = document.querySelector(".left-arrow");
 const rightArrow = document.querySelector(".right-arrow");
 const clientDataContainer = document.getElementById("client-data-container");
 const serverDataContainer = document.getElementById("server-data-container");
+const showAllButton = document.getElementById("show-all-button");
 
 acceptButton.addEventListener("click", async () => {
     overlay.style.opacity = 0;
@@ -29,6 +30,15 @@ leftArrow.addEventListener('click', () => {
     pageWrapper.style.transform = 'translateX(0%)';
     leftArrow.style.display = 'none';
     rightArrow.style.display = 'block';
+});
+
+showAllButton.addEventListener('click', () => {
+    const allValues = document.querySelectorAll('.data-value');
+    allValues.forEach(value => {
+        value.classList.add('unblurred');
+    });
+    showAllButton.style.opacity = '0';
+    showAllButton.style.pointerEvents = 'none';
 });
 
 function startSocketHeartbeat() {
