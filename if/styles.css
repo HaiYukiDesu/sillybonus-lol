@@ -196,6 +196,13 @@ h1, h2, h3, h4, h5, h6 {
 .data-value {
     display: block;
     color: white;
+    filter: blur(4px);
+    transition: filter 0.2s ease-in-out;
+}
+
+.data-value.unblurred,
+.data-item:hover .data-value {
+    filter: blur(0px);
 }
 
 @media (max-width: 768px) {
