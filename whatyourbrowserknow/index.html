@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<meta content="What Your Browser Knows - sillybonus.lol" property="og:title" />
-<meta content="A tool to show you what information your browser shares with websites." property="og:description" />
+<meta content="Your Internet Footprint - sillybonus.lol" property="og:title" />
+<meta content="An interactive tool to show you the digital footprint you leave on websites." property="og:description" />
 <meta content="https://sillybonus.lol/" property="og:url" />
 <meta content="https://cdn.sillybonus.lol/assets/kanade.jpg" property="og:image" />
 <meta content="#ffe1ff" data-react-helmet="true" name="theme-color" />
 <html lang="en">
 <head>
-    <title>What Your Browser Knows</title>
+    <title>Your Internet Footprint</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,14 +17,31 @@
 <body>
     <div class="initial-blur"></div>
     <div class="parallax-container" id="stars-container"></div>
+    
     <div class="content-container">
-        <div id="data-display-container">
-            <h2>Fetching your data...</h2>
+        <div class="page-wrapper">
+            <div class="page" id="client-page">
+                <h3>What Your Browser Knows</h3>
+                <div id="client-data-container" class="data-container">
+                    <h2>Fetching your data...</h2>
+                </div>
+            </div>
+            <div class="page" id="server-page">
+                <h3>What a Website Knows</h3>
+                <div id="server-data-container" class="data-container">
+                    <h2>Fetching your data...</h2>
+                </div>
+            </div>
         </div>
+
+        <button class="nav-arrow left-arrow" style="display: none;"><i class="fas fa-chevron-left"></i></button>
+        <button class="nav-arrow right-arrow"><i class="fas fa-chevron-right"></i></button>
+        
         <div class="footer-disclaimer">
-            <p>Data is provided for educational purposes and may not be 100% accurate. IP address data from <a href="https://ipify.org" target="_blank">ipify.org</a>.</p>
+            <p>Data is provided for educational purposes and may not be 100% accurate.</p>
         </div>
     </div>
+
     <div id="click-to-enter-overlay" class="click-to-enter-overlay">
         <div class="disclaimer-content">
             <h2>Disclaimer</h2>
