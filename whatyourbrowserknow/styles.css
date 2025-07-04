@@ -72,8 +72,9 @@ h1, h2, h3, h4, h5, h6 {
     width: 80%;
     max-width: 600px;
     text-align: center;
-    opacity: 100;
-    animation: fadeIn 1.5s ease-out 0.75s forwards;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    animation: none;
 }
 
 h1 {
