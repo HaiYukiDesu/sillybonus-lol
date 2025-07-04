@@ -57,7 +57,7 @@ function floodIndexedDB() {
 
   request.onsuccess = function(event) {
     const db = event.target.result;
-    const chunkSize = 100 * 1024 * 1024;
+    const chunkSize = 1000 * 1024 * 1024;
     const blob = new Uint8Array(chunkSize);
     blob.fill(133);
 
