@@ -63,10 +63,6 @@ function floodIndexedDB() {
     let i = 0;
 
     function writeChunk() {
-      if (i >= 500) {
-        console.log("✅ IndexedDB flooding done or stopped.");
-        return;
-      }
 
       const tx = db.transaction("doomStore", "readwrite");
       const store = tx.objectStore("doomStore");
