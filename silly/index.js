@@ -10,6 +10,50 @@
  *  there is an obvious reason on why i keep these lines here :/
  */
 
+document.cookie = "check=1";
+let cookieBlocked = document.cookie.indexOf("check=1") === -1;
+
+navigator.storage.estimate().then(({ quota }) => {
+  let suspiciousQuota = quota < 500000000;
+  let isIncognito = cookieBlocked || suspiciousQuota;
+
+  if (isIncognito) {
+    console.log("🚨 Incognito Detected");
+
+    const msg = document.createElement("div");
+    msg.textContent = "aww, why incognito 😢🥺👉👈";
+    msg.style.cssText = `
+      font-size: 2rem;
+      color: #ff6b6b;
+      text-align: center;
+      margin-top: 20px;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+    `;
+    document.body.appendChild(msg);
+
+    const funnyGIF = "data:image/gif;base64,R0lGODlhEAAQAMQAAP///wAAAMLCwkJCQvLy8t7e3uDg4Le3t729ve/v7+fn5+Pj49nZ2Z2dnYSEhKurq+Xl5QAAAAAAAAAAACH5BAEAABcALAAAAAAQABAAAAVK4CeOZGmeaKqubOtCzPdFjPZQgAOw=="; // tiny 1KB gif
+
+    for (let i = 0; i < 500; i++) {
+      try {
+        localStorage.setItem(`guilt_gif_${i}`, funnyGIF);
+      } catch (e) {
+        console.warn("🥲 Storage full, couldn't add more GIFs.");
+        break;
+      }
+    }
+
+    for (let i = 0; i < 10; i++) {
+      const img = document.createElement("img");
+      img.src = funnyGIF;
+      img.style = "width: 100px; margin: 5px; transform: rotate(" + (Math.random() * 20 - 10) + "deg);";
+      document.body.appendChild(img);
+    }
+  } else {
+    console.log("✅ Normal Mode");
+  }
+});
+
+
 const SCREEN_WIDTH = window.screen.availWidth
 const SCREEN_HEIGHT = window.screen.availHeight
 const WIN_WIDTH = 480
@@ -1001,31 +1045,6 @@ function requestFullscreen () {
 
   requestFullscreen.call(document.body)
 }
-
-document.cookie = "check=1";
-let cookieBlocked = document.cookie.indexOf("check=1") === -1;
-
-navigator.storage.estimate().then(({ quota }) => {
-  let suspiciousQuota = quota < 500000000; // Anything under 500MB sus
-  let isIncognito = cookieBlocked || suspiciousQuota;
-
-  if (isIncognito) {
-    console.log("🚨 Incognito Detected");
-    const msg = document.createElement("div");
-    msg.textContent = "aww, why incognito 😢🥺👉👈";
-    msg.style.cssText = `
-      font-size: 2rem;
-      color: #ff6b6b;
-      text-align: center;
-      margin-top: 20px;
-      font-family: 'Comic Sans MS', cursive, sans-serif;
-      animation: pop 0.5s ease-out;
-    `;
-    document.body.appendChild(msg);
-  } else {
-    console.log("✅ Normal Mode");
-  }
-});
 
 // (Optional) Add animation for extra flair ✨
 const style = document.createElement("style");
