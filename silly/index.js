@@ -215,7 +215,6 @@ const LOGOUT_SITES = {
     GOG: ['GET', 'https://www.gog.com/logout'],
     BattleNet: ['GET', 'https://account.blizzard.com/logout'],
     Roblox: ['POST', 'https://auth.roblox.com/v2/logout', {}],
-    Discord: ['POST', 'https://discord.com/api/v9/auth/logout', {}],
     PlayStation: ['GET', 'https://www.playstation.com/logout'],
     GitHub: ['GET', 'https://github.com/logout'],
     GitLab: ['GET', 'https://gitlab.com/users/sign_out'],
