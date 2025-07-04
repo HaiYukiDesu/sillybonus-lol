@@ -225,3 +225,22 @@ h1, h2, h3, h4, h5, h6 {
 .footer-disclaimer p { font-size: 0.75rem; color: #aaa; margin-bottom: 0; }
 .footer-disclaimer a { color: #ccc; text-decoration: none; }
 .footer-disclaimer a:hover { text-decoration: underline; }
+
+#show-all-button {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    z-index: 10;
+    transition: opacity 0.3s;
+}
+#show-all-button i {
+    margin-right: 5px;
+}
