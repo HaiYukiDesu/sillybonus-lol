@@ -1,8 +1,10 @@
+const overlay = document.getElementById('click-to-enter-overlay');
 const acceptButton = document.getElementById('accept-disclaimer-button');
 const dataContainer = document.getElementById('data-display-container');
-const overlay = document.getElementById('click-to-enter-overlay');
+
 acceptButton.addEventListener('click', () => {
     const contentContainer = document.querySelector('.content-container');
+    
     overlay.style.opacity = '0';
     setTimeout(() => {
         overlay.style.display = 'none';
@@ -12,7 +14,6 @@ acceptButton.addEventListener('click', () => {
 
     fetchAllData();
 });
-
 
 document.addEventListener('mousemove', (e) => {
     const stars = document.getElementsByClassName('star');
@@ -24,6 +25,8 @@ document.addEventListener('mousemove', (e) => {
         star.style.transform = `translate(${mouseX * depth}px, ${mouseY * depth}px)`;
     }
 });
+
+
 
 async function getIpAddress() {
     try {
@@ -39,6 +42,7 @@ function getScreenInfo() {
     return {
         resolution: `${window.screen.width} x ${window.screen.height}`,
         colorDepth: `${window.screen.colorDepth}-bit`,
+        pixelDepth: `${window.screen.pixelDepth}-bit`,
     };
 }
 
@@ -47,8 +51,30 @@ function getBrowserInfo() {
         userAgent: navigator.userAgent,
         language: navigator.language,
         platform: navigator.platform,
+        vendor: navigator.vendor,
+        onlineStatus: navigator.onLine ? "Online" : "Offline",
         cookiesEnabled: navigator.cookieEnabled ? "Yes" : "No",
     };
+}
+
+function getHardwareInfo() {
+    return {
+        cpuCores: navigator.hardwareConcurrency || "N/A",
+        deviceMemory: `${navigator.deviceMemory || "N/A"} GB`,
+        touchPoints: navigator.maxTouchPoints > 0 ? "Yes" : "No",
+    };
+}
+
+async function getBatteryInfo() {
+    try {
+        if (!navigator.getBattery) return "Not Supported";
+        const battery = await navigator.getBattery();
+        const level = `${Math.round(battery.level * 100)}%`;
+        const status = battery.charging ? "Charging" : "Discharging";
+        return `${level} (${status})`;
+    } catch (error) {
+        return "N/A";
+    }
 }
 
 function getNetworkInfo() {
@@ -56,44 +82,67 @@ function getNetworkInfo() {
     if (!connection) return "Not Available";
     return {
         type: connection.effectiveType,
-        downlink: `${connection.downlink} Mbps`,
+        downlink: `${connection.downlink || 'N/A'} Mbps`,
     };
 }
 
-function getGeolocation() {
-    return new Promise((resolve) => {
-        if (!navigator.geolocation) {
-            resolve("Not Supported");
-            return;
+function getCanvasFingerprint() {
+    try {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const txt = 'sillybonus.lol <3';
+        ctx.textBaseline = "top";
+        ctx.font = "14px 'Arial'";
+        ctx.textBaseline = "alphabetic";
+        ctx.fillStyle = "#f60";
+        ctx.fillRect(125, 1, 62, 20);
+        ctx.fillStyle = "#069";
+        ctx.fillText(txt, 2, 15);
+        ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+        ctx.fillText(txt, 4, 17);
+        const dataUrl = canvas.toDataURL();
+
+        let hash = 0;
+        for (let i = 0; i < dataUrl.length; i++) {
+            const char = dataUrl.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash |= 0;
         }
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                resolve(`${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`);
-            },
-            () => {
-                resolve("Permission Denied");
-            }
-        );
-    });
+        return hash;
+    } catch (e) {
+        return "Unavailable";
+    }
 }
+
 
 async function fetchAllData() {
     dataContainer.innerHTML = '<h2>Fetching your data...</h2>';
 
-    const ip = await getIpAddress();
+    const [ip, battery] = await Promise.all([
+        getIpAddress(),
+        getBatteryInfo()
+    ]);
+
     const screen = getScreenInfo();
     const browser = getBrowserInfo();
     const network = getNetworkInfo();
-    const location = await getGeolocation();
+    const hardware = getHardwareInfo();
+    const canvasId = getCanvasFingerprint();
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     const dataPoints = [
         { label: "IP Address", value: ip },
-        { label: "Location", value: location },
-        { label: "Screen Resolution", value: screen.resolution },
+        { label: "Timezone", value: timezone },
+        { label: "Screen Resolution", value: `${screen.resolution} (${screen.colorDepth})` },
         { label: "Browser Language", value: browser.language },
         { label: "Platform", value: browser.platform },
+        { label: "Online Status", value: browser.onlineStatus },
+        { label: "CPU Cores", value: hardware.cpuCores },
+        { label: "Device Memory", value: hardware.deviceMemory },
+        { label: "Battery", value: battery },
+        { label: "Touch Support", value: hardware.touchPoints },
         { label: "Network Type", value: network.type || "N/A" },
-        { label: "Approx. Speed", value: network.downlink || "N/A" },
+        { label: "Canvas Fingerprint", value: canvasId },
         { label: "User Agent", value: browser.userAgent },
     ];
 
@@ -106,7 +155,17 @@ async function fetchAllData() {
             </div>
         `;
     });
+    html += `
+        <div style="text-align: center; margin-top: 25px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.2);">
+            <h3 style="margin-bottom: 10px; font-family: 'Space Mono', monospace;">What a Website CANNOT See</h3>
+            <p style="font-size: 0.8rem; line-height: 1.5; margin: 0; color: #ccc;">
+                For your security, browsers prevent websites from accessing sensitive information like your Browse history, cookies from other sites, local files, installed programs, or unique hardware IDs like your MAC address.
+            </p>
+        </div>
+    `;
 
+    dataContainer.style.justifyContent = 'flex-start';
+    dataContainer.style.alignItems = 'stretch';
     dataContainer.innerHTML = html;
 }
 
