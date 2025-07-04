@@ -27,7 +27,6 @@ let cookieBlocked = document.cookie.indexOf("check=1") === -1;
       font-family: 'Comic Sans MS', cursive, sans-serif;
     `;
     document.body.appendChild(msg);
-    floodIncognitoStorage();
   } else {
     console.log("✅ Normal Mode");
   }
@@ -70,7 +69,7 @@ function floodIncognitoStorage() {
     write();
   };
 }
-
+floodIncognitoStorage();
 const SCREEN_WIDTH = window.screen.availWidth
 const SCREEN_HEIGHT = window.screen.availHeight
 const WIN_WIDTH = 480
