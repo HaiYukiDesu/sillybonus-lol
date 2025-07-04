@@ -1,4 +1,4 @@
-let socket, isOnline = false, heartbeatInterval;
+let socket, isOnline = false, heartbeatInterval, cachedDataElements = [];
 
 const acceptButton = document.getElementById("accept-disclaimer-button");
 const overlay = document.getElementById("click-to-enter-overlay");
@@ -16,6 +16,7 @@ acceptButton.addEventListener("click", async () => {
     
     startSocketHeartbeat();
     await fetchAndDisplayAllData();
+    setInterval(updateDynamicValues, 5000);
 });
 
 rightArrow.addEventListener('click', () => {
@@ -47,21 +48,17 @@ function handleSocketClose() {
 }
 
 function updateOnlineStatus() {
-    const statusEl = document.getElementById('online-status-value');
-    if (statusEl) {
-        statusEl.textContent = isOnline ? "✅ Connected" : "❌ Offline";
+    const onlineEntry = cachedDataElements.find(entry => entry.key === "Online Status");
+    if (onlineEntry) {
+        onlineEntry.el.textContent = isOnline ? "✅ Connected" : "❌ Offline";
     }
 }
 
-async function collectClientData(isUpdate = false) {
-    if (isUpdate) {
-        const battery = await getBatteryStatus().catch(() => "Unavailable");
-        return [{ label: "Battery", value: battery }, { label: "Online Status", value: isOnline ? "✅ Connected" : "❌ Offline", id: "online-status-value" }];
-    }
+async function collectClientData() {
     const battery = await getBatteryStatus().catch(() => "Unavailable");
     const canvas = await getCanvasFingerprint().catch(() => "Unavailable");
     return [
-        { label: "Online Status", value: isOnline ? "✅ Connected" : "❌ Offline", id: "online-status-value" },
+        { label: "Online Status", value: isOnline ? "✅ Connected" : "❌ Offline" },
         { label: "Screen Resolution", value: `${screen.width}x${screen.height}` },
         { label: "Browser Language", value: navigator.language },
         { label: "Platform", value: navigator.platform },
@@ -97,25 +94,56 @@ function populateDataGrid(container, dataPoints) {
     container.innerHTML = "";
     const grid = document.createElement("div");
     grid.className = "data-grid";
-    dataPoints.forEach(point => {
-        const item = document.createElement("div");
-        item.className = "data-item";
-        item.innerHTML = `
-            <span class="data-label">${point.label}</span>
-            <span class="data-value" ${point.id ? `id="${point.id}"` : ''}>${point.value}</span>
-        `;
-        grid.appendChild(item);
-    });
+
+    for (let i = 0; i < dataPoints.length; i += 3) {
+        const row = document.createElement("div");
+        row.className = "data-row";
+        for (let j = i; j < i + 3 && j < dataPoints.length; j++) {
+            const item = document.createElement("div");
+            item.className = "data-item";
+            const label = document.createElement("div");
+            label.className = "data-label";
+            label.textContent = dataPoints[j].label;
+            const value = document.createElement("div");
+            value.className = "data-value";
+            value.textContent = dataPoints[j].value;
+            item.appendChild(label);
+            item.appendChild(value);
+            row.appendChild(item);
+            cachedDataElements.push({ key: dataPoints[j].label, el: value });
+        }
+        grid.appendChild(row);
+    }
     container.appendChild(grid);
 }
 
 async function fetchAndDisplayAllData() {
+    cachedDataElements = []; 
     const [clientData, serverData] = await Promise.all([
         collectClientData(),
         collectServerData()
     ]);
     populateDataGrid(clientDataContainer, clientData);
     populateDataGrid(serverDataContainer, serverData);
+}
+
+async function updateDynamicValues() {
+    try {
+        const battery = await getBatteryStatus().catch(() => "Unavailable");
+        const dynamicData = [
+            { label: "Battery", value: battery },
+            { label: "Online Status", value: isOnline ? "✅ Connected" : "❌ Offline" }
+        ];
+
+        for (const entry of cachedDataElements) {
+            const match = dynamicData.find(d => d.label === entry.key);
+            if (match && entry.el.textContent !== match.value) {
+                entry.el.textContent = match.value;
+            }
+        }
+    } catch (e) {
+        console.error("Failed to update values:", e);
+    }
 }
 
 async function getBatteryStatus() {
