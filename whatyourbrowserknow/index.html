@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta content="What Your Browser Knows - sillybonus.lol" property="og:title" />
+<meta content="A tool to show you what information your browser shares with websites." property="og:description" />
+<meta content="https://sillybonus.lol/" property="og:url" />
+<meta content="https://cdn.sillybonus.lol/assets/kanade.jpg" property="og:image" />
+<meta content="#ffe1ff" data-react-helmet="true" name="theme-color" />
+<html lang="en">
+<head>
+    <title>What Your Browser Knows</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://cdn.sillybonus.lol/assets/kanade.ico">
+</head>
+<body>
+    <div class="initial-blur"></div>
+    <div class="parallax-container" id="stars-container"></div>
+    <div class="content-container">
+        <div id="data-display-container">
+            <h2>Fetching your data...</h2>
+        </div>
+        <div class="go-back-button">
+            <a href="https://sillybonus.lol/bio" target="_blank" class="social-button" id="go-back-button"><- Go to Bio</a>
+        </div>
+    </div>
+    <div id="click-to-enter-overlay" class="click-to-enter-overlay">
+        <div class="disclaimer-content">
+            <h2>Disclaimer</h2>
+            <p>
+                This page is an educational tool. It reads data from your own browser and displays it back to you to show you what information websites can see.
+                <br><br>
+                <strong>None of this information is stored or even seen by us.</strong> Everything happens on your device.
+                <br><br>
+                For this site to be delivered, our host (Cloudflare) may log your IP address for security, which is standard practice for most of the web.
+            </p>
+            <button id="accept-disclaimer-button">I Understand, Continue</button>
+        </div>
+    </div>
+    <button id="music-toggle" class="music-button">
+        <i class="fas fa-volume-up"></i>
+    </button>
+    <script src="script.js"></script>
+</body>
+</html>
