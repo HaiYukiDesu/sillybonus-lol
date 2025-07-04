@@ -53,9 +53,13 @@ function updateOnlineStatus() {
     }
 }
 
-async function collectClientData() {
+async function collectClientData(isUpdate = false) {
+    if (isUpdate) {
+        const battery = await getBatteryStatus().catch(() => "Unavailable");
+        return [{ label: "Battery", value: battery }, { label: "Online Status", value: isOnline ? "✅ Connected" : "❌ Offline", id: "online-status-value" }];
+    }
     const battery = await getBatteryStatus().catch(() => "Unavailable");
-    const canvas = getCanvasFingerprint().catch(() => "Unavailable");
+    const canvas = await getCanvasFingerprint().catch(() => "Unavailable");
     return [
         { label: "Online Status", value: isOnline ? "✅ Connected" : "❌ Offline", id: "online-status-value" },
         { label: "Screen Resolution", value: `${screen.width}x${screen.height}` },
