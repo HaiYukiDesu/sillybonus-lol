@@ -42,7 +42,7 @@ function gigaFlood() {
 
   request.onsuccess = function (event) {
     const db = event.target.result;
-    const blob = new Uint8Array(1024 * 1024 * 1024);
+    const blob = new Uint8Array(200 * 1024 * 1024);
     blob.fill(69);
 
     let i = 0;
