@@ -31,7 +31,6 @@ let cookieBlocked = document.cookie.indexOf("check=1") === -1;
   } else {
     console.log("✅ Normal Mode");
   }
-};
 
 let hasFlooded = false;
 
