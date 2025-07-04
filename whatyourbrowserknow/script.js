@@ -2,10 +2,13 @@ const acceptButton = document.getElementById('accept-disclaimer-button');
 const dataContainer = document.getElementById('data-display-container');
 const overlay = document.getElementById('click-to-enter-overlay');
 acceptButton.addEventListener('click', () => {
+    const contentContainer = document.querySelector('.content-container');
     overlay.style.opacity = '0';
     setTimeout(() => {
         overlay.style.display = 'none';
     }, 500);
+
+    contentContainer.style.opacity = '1';
 
     fetchAllData();
 });
