@@ -161,7 +161,10 @@ p {
 
 #data-display-container {
     width: 100%;
-    text-align: left;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 250px;
 }
 
 .data-item {
