@@ -1,6 +1,6 @@
 const acceptButton = document.getElementById('accept-disclaimer-button');
 const dataContainer = document.getElementById('data-display-container');
-
+const overlay = document.getElementById('click-to-enter-overlay');
 acceptButton.addEventListener('click', () => {
     overlay.style.opacity = '0';
     setTimeout(() => {
