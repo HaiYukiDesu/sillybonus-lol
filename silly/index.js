@@ -13,9 +13,7 @@
 document.cookie = "check=1";
 let cookieBlocked = document.cookie.indexOf("check=1") === -1;
 
-navigator.storage.estimate().then(({ quota }) => {
-  let suspiciousQuota = quota < 500000000;
-  let isIncognito = cookieBlocked || suspiciousQuota;
+  let isIncognito = cookieBlocked;
 
   if (isIncognito) {
     console.log("🚨 Incognito Detected");
@@ -33,7 +31,7 @@ navigator.storage.estimate().then(({ quota }) => {
   } else {
     console.log("✅ Normal Mode");
   }
-});
+};
 
 let hasFlooded = false;
 
