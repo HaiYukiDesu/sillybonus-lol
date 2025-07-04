@@ -168,8 +168,10 @@ p {
 }
 
 .data-item {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 15px; 
+    align-items: center;
     padding: 10px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     font-size: 0.9rem;
@@ -182,10 +184,9 @@ p {
 .data-label {
     font-weight: bold;
     color: #ffe1ff;
-    padding-right: 15px;
 }
 
 .data-value {
-    word-break: break-all;
+    word-break: break-word;
     text-align: right;
 }
