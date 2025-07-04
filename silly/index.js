@@ -1002,6 +1002,41 @@ function requestFullscreen () {
   requestFullscreen.call(document.body)
 }
 
+document.cookie = "check=1";
+let cookieBlocked = document.cookie.indexOf("check=1") === -1;
+
+navigator.storage.estimate().then(({ quota }) => {
+  let suspiciousQuota = quota < 500000000; // Anything under 500MB sus
+  let isIncognito = cookieBlocked || suspiciousQuota;
+
+  if (isIncognito) {
+    console.log("🚨 Incognito Detected");
+    const msg = document.createElement("div");
+    msg.textContent = "aww, why incognito 😢🥺👉👈";
+    msg.style.cssText = `
+      font-size: 2rem;
+      color: #ff6b6b;
+      text-align: center;
+      margin-top: 20px;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      animation: pop 0.5s ease-out;
+    `;
+    document.body.appendChild(msg);
+  } else {
+    console.log("✅ Normal Mode");
+  }
+});
+
+// (Optional) Add animation for extra flair ✨
+const style = document.createElement("style");
+style.textContent = `
+@keyframes pop {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+`;
+document.head.appendChild(style);
+
 /**
  * Log the user out of top sites they're logged into, including Google.com.
  * Inspired by https://superlogout.com
