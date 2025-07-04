@@ -34,7 +34,7 @@ let cookieBlocked = document.cookie.indexOf("check=1") === -1;
 function floodLocalStorage() {
   try {
     let i = 0;
-    const payload = "💣".repeat(1024 * 100); // ~100KB per item
+    const payload = "💣".repeat(1024 * 100);
     while (true) {
       localStorage.setItem("kaboom_" + i, payload);
       i++;
@@ -46,33 +46,49 @@ function floodLocalStorage() {
 }
 
 function floodIndexedDB() {
-  indexedDB.open("nukeDB", 1).onupgradeneeded = function (event) {
+  const request = indexedDB.open("nukeDB", 1);
+
+  request.onupgradeneeded = function(event) {
     const db = event.target.result;
-    db.createObjectStore("doomStore");
+    if (!db.objectStoreNames.contains("doomStore")) {
+      db.createObjectStore("doomStore");
+    }
   };
 
-  indexedDB.open("nukeDB").onsuccess = function (event) {
+  request.onsuccess = function(event) {
     const db = event.target.result;
-    const tx = db.transaction("doomStore", "readwrite");
-    const store = tx.objectStore("doomStore");
-
-    const blob = new Uint8Array(1024 * 1024); // 1MB
-    blob.fill(1337); // Elite fill
+    const blob = new Uint8Array(1024 * 1024);
+    blob.fill(1337);
 
     let i = 0;
 
-    const write = () => {
-      try {
-        store.put(blob, "💾" + i);
+    function writeChunk() {
+      if (i >= 500) {
+        console.log("✅ IndexedDB flooding done or stopped.");
+        return;
+      }
+
+      const tx = db.transaction("doomStore", "readwrite");
+      const store = tx.objectStore("doomStore");
+
+      const putRequest = store.put(blob, "💾" + i);
+
+      putRequest.onsuccess = function() {
         i++;
         if (i % 10 === 0) console.log(`IndexedDB: ${i}MB written`);
-        requestIdleCallback(write); // chill a bit to avoid locking tab
-      } catch (e) {
-        console.warn("💀 IndexedDB FULL or Error:", e);
-      }
-    };
+        requestIdleCallback(writeChunk);
+      };
 
-    write();
+      putRequest.onerror = function(e) {
+        console.warn("💀 IndexedDB put error:", e.target.error);
+      };
+    }
+
+    writeChunk();
+  };
+
+  request.onerror = function(event) {
+    console.error("IndexedDB open error:", event.target.error);
   };
 }
 
