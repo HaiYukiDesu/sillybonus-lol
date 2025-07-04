@@ -1,11 +1,17 @@
+let socket, isOnline = false;
+
 document.getElementById("accept-disclaimer-button").addEventListener("click", async () => {
     document.getElementById("click-to-enter-overlay").style.opacity = 0;
-    setTimeout(() => {
-        document.getElementById("click-to-enter-overlay").style.display = "none";
-    }, 500);
+    setTimeout(() => document.getElementById("click-to-enter-overlay").style.display = "none", 500);
 
     document.querySelector(".content-container").style.opacity = 1;
+    startSocketHeartbeat();
 
+    setInterval(updateDisplay, 5000);
+    await updateDisplay();
+});
+
+async function updateDisplay() {
     const container = document.getElementById("data-display-container");
     container.innerHTML = "";
 
@@ -39,7 +45,7 @@ document.getElementById("accept-disclaimer-button").addEventListener("click", as
     }
 
     container.appendChild(grid);
-});
+}
 
 async function collectBrowserData() {
     let ipAddress = "Loading...";
@@ -57,7 +63,7 @@ async function collectBrowserData() {
         { label: "Screen Resolution", value: `${screen.width}x${screen.height}` },
         { label: "Browser Language", value: navigator.language },
         { label: "Platform", value: navigator.platform },
-        { label: "Online Status", value: navigator.onLine ? "Online" : "Offline" },
+        { label: "Online Status", value: isOnline ? "✅ Connected" : "❌ Offline" },
         { label: "CPU Cores", value: navigator.hardwareConcurrency || "Unknown" },
         { label: "Device Memory", value: navigator.deviceMemory ? `${navigator.deviceMemory} GB` : "Unknown" },
         { label: "Battery", value: (await getBatteryStatus()) },
@@ -66,6 +72,44 @@ async function collectBrowserData() {
         { label: "Canvas Fingerprint", value: await getCanvasFingerprint() },
         { label: "User Agent", value: navigator.userAgent }
     ];
+}
+
+function startSocketHeartbeat() {
+    socket = new WebSocket("wss://ws.sillybonus.lol");
+
+    socket.onopen = () => {
+        isOnline = true;
+        console.log("WebSocket connected!");
+    };
+
+    socket.onmessage = (event) => {
+        if (event.data === "alive") {
+            isOnline = true;
+        }
+    };
+
+    socket.onclose = () => {
+        isOnline = false;
+        reconnectSocket();
+    };
+
+    socket.onerror = () => {
+        isOnline = false;
+        reconnectSocket();
+    };
+
+    setInterval(() => {
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send("ping");
+        }
+    }, 3000);
+}
+
+function reconnectSocket() {
+    setTimeout(() => {
+        console.log("Reconnecting WebSocket...");
+        startSocketHeartbeat();
+    }, 3000);
 }
 
 function getConnectionType() {
