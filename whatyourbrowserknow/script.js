@@ -66,13 +66,15 @@ async function collectClientData() {
         { label: "Device Memory", value: navigator.deviceMemory ? `${navigator.deviceMemory} GB` : "Unknown" },
         { label: "Battery", value: battery },
         { label: "Touch Support", value: "ontouchstart" in window ? "Yes" : "No" },
+        { label: "Vendor", value: navigator.vendor || "Unknown" },
         { label: "Canvas Fingerprint", value: canvas },
+        { label: "User Agent", value: navigator.userAgent },
     ];
 }
 
 async function collectServerData() {
     try {
-        const res = await fetch("https://api.sillybonus.lol/v0/?info=true");
+        const res = await fetch("https://api.sillybonus.lol/v0/info");
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
         return [
@@ -80,9 +82,9 @@ async function collectServerData() {
             { label: "Approx. Location", value: `${data.city || 'N/A'}, ${data.country || 'N/A'}` },
             { label: "Timezone", value: data.timezone || 'N/A' },
             { label: "Internet Provider", value: data.asn || 'N/A' },
-            { label: "User Agent", value: data.userAgent || 'N/A' },
             { label: "HTTP Protocol", value: data.httpProtocol || 'N/A' },
             { label: "Referer", value: data.referer || 'N/A' },
+            { label: "User Agent", value: data.userAgent || 'N/A' },
         ];
     } catch (e) {
         console.error("Failed to fetch server data:", e);
