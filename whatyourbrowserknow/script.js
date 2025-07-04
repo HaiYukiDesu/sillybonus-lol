@@ -62,10 +62,12 @@ async function collectClientData() {
         { label: "Screen Resolution", value: `${screen.width}x${screen.height}` },
         { label: "Browser Language", value: navigator.language },
         { label: "Platform", value: navigator.platform },
+        { label: "Timezone", value: Intl.DateTimeFormat().resolvedOptions().timeZone },
         { label: "CPU Cores", value: navigator.hardwareConcurrency || "Unknown" },
         { label: "Device Memory", value: navigator.deviceMemory ? `${navigator.deviceMemory} GB` : "Unknown" },
         { label: "Battery", value: battery },
         { label: "Touch Support", value: "ontouchstart" in window ? "Yes" : "No" },
+        { label: "Network Type", value: getConnectionType() },
         { label: "Vendor", value: navigator.vendor || "Unknown" },
         { label: "Canvas Fingerprint", value: canvas },
         { label: "User Agent", value: navigator.userAgent },
@@ -90,6 +92,11 @@ async function collectServerData() {
         console.error("Failed to fetch server data:", e);
         return [{ label: "Server Data", value: "Could not be fetched." }];
     }
+}
+
+function getConnectionType() {
+    const nav = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    return nav?.effectiveType || "Unknown";
 }
 
 function populateDataGrid(container, dataPoints) {
