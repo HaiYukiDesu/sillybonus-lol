@@ -38,22 +38,25 @@ async function initDisplay(){
 }
 
 async function updateValues(){
-    const fresh=await collectBrowserData()
-    for(const entry of cachedDataElements){
-        const match=fresh.find(d=>d.label===entry.key)
-        if(match)entry.el.textContent=match.value
-    }
+    try{
+        const fresh=await collectBrowserData()
+        for(const entry of cachedDataElements){
+            const match=fresh.find(d=>d.label===entry.key)
+            if(match)entry.el.textContent=match.value
+        }
+    }catch{}
 }
 
+
 async function collectBrowserData(){
-    let ipAddress="Loading..."
+    let ipAddress="Unavailable"
     try{
         const res=await fetch("https://api.ipify.org?format=json")
         const data=await res.json()
         ipAddress=data.ip
-    }catch{
-        ipAddress="Unavailable"
-    }
+    }catch{}
+    let battery=await getBatteryStatus().catch(()=>"Unavailable")
+    let canvas=await getCanvasFingerprint().catch(()=>"Unavailable")
     return[
         {label:"IP Address",value:ipAddress},
         {label:"Timezone",value:Intl.DateTimeFormat().resolvedOptions().timeZone},
@@ -63,13 +66,14 @@ async function collectBrowserData(){
         {label:"Online Status",value:isOnline?"✅ Connected":"❌ Offline"},
         {label:"CPU Cores",value:navigator.hardwareConcurrency||"Unknown"},
         {label:"Device Memory",value:navigator.deviceMemory?`${navigator.deviceMemory} GB`:"Unknown"},
-        {label:"Battery",value:await getBatteryStatus()},
+        {label:"Battery",value:battery},
         {label:"Touch Support",value:"ontouchstart"in window?"Yes":"No"},
         {label:"Network Type",value:getConnectionType()},
-        {label:"Canvas Fingerprint",value:await getCanvasFingerprint()},
+        {label:"Canvas Fingerprint",value:canvas},
         {label:"User Agent",value:navigator.userAgent}
     ]
 }
+
 
 function startSocketHeartbeat(){
     if(socket&&socket.readyState<=1)return
