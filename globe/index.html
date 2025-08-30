@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>why did i make this</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <style>
+        body { margin: 0; background-color: #000; overflow: hidden; color: white; font-family: monospace; }
+        #canvas-container { display: none; }
+        #landing-page {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        #landing-page h1 { font-size: 2.5rem; color: #58a6ff; }
+        #landing-page button {
+            background-color: #21262d; border: 1px solid #30362d; color: #c9d1d9;
+            padding: 15px 30px; margin: 10px; border-radius: 6px; cursor: pointer;
+            font-size: 1rem; transition: all 0.2s ease;
+        }
+        #landing-page button:hover { border-color: #8b949e; background-color: #30363d; }
+        #loading { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 1.5rem; }
+        #info-box {
+            display: none;
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #30362d;
+            max-width: 350px;
+            backdrop-filter: blur(5px);
+        }
+        #country-name { font-size: 1.2rem; font-weight: bold; color: #58a6ff; }
+        #country-time { font-size: 1rem; color: #c9d1d9; margin-bottom: 10px; }
+        #progress-container {
+            display: none;
+            position: absolute;
+            top: 55%;
+            left: 50%;
+            width: 300px;
+            transform: translate(-50%, -50%);
+            height: 10px;
+            background-color: #21262d;
+            border: 1px solid #30362d;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: #58a6ff;
+            transition: width 0.4s ease-out;
+        }
+        /* --- NEW: Gemini Feature Styles --- */
+        #gemini-button {
+            background-color: #30363d;
+            border: 1px solid #58a6ff;
+            color: #58a6ff;
+            padding: 8px 12px;
+            width: 100%;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            margin-bottom: 10px;
+        }
+        #gemini-button:hover {
+            background-color: #58a6ff;
+            color: #000;
+        }
+        #gemini-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        #gemini-content {
+            font-size: 0.9rem;
+            color: #c9d1d9;
+            border-top: 1px solid #30362d;
+            padding-top: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="landing-page">
+        <h1>Celestial Navigator</h1>
+        <button id="simple-mode-btn">Simple Mode</button>
+        <button id="cinematic-mode-btn">Cinematic Mode</button>
+    </div>
+    <div id="loading">Loading...</div>
+    <div id="progress-container">
+        <div id="progress-bar"></div>
+    </div>
+    <div id="canvas-container"></div>
+    <div id="info-box">
+        <div id="country-name"></div>
+        <div id="country-time"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    
+    <script type="module">
+        // buttons that decide your fate
+        const dumbBtnYesDot = document.getElementById('simple-mode-btn');
+        const dumbBtnMovieDrama = document.getElementById('cinematic-mode-btn');
+
+        // the big "pls go away" divs
+        const dumbLandingHell = document.getElementById('landing-page');
+        const dumbLoadingSuffering = document.getElementById('loading');
+        const dumbCanvasBoxThing = document.getElementById('canvas-container');
+        const dumbInfoBlob = document.getElementById('info-box');
+
+        // country info aka pain container
+        const dumbCountryWord = document.getElementById('country-name');
+        const dumbCountryClocky = document.getElementById('country-time');
+
+        // 3D torture devices
+        let dumbScene, dumbEye, dumbRenderBox, dumbControlFreak, dumbTimeClock, dumbCompresso, dumbLaserPointer, dumbRodent;
+
+        // keyboard sadness
+        const dumbKeyCry = {};
+        let dumbControlMode;
+        let dumbClickableFakeCountries = [];
+        let dumbCountryVictim;
+        let dumbTimeSpamInterval;
+        let dumbLastHoverLag = 0;
+        const dumbHoverLagTime = 100;
+
+        // 💀 script loader of doom
+        function loadPainfulScript(why) {
+            return new Promise((cry, scream) => {
+                const suffer = document.createElement('script');
+                suffer.src = why;
+                suffer.onload = cry;
+                suffer.onerror = scream;
+                document.body.appendChild(suffer);
+            });
+        }
+
+        // ✨ circle thingy because why not
+        function makeCircleThingyBecauseWhyNot() {
+            const sadness = new THREE.Shape();
+            sadness.absarc(0, 0, 0.5, 0, Math.PI * 2, false);
+            return sadness;
+        }
+
+        // ⚰️ init pain dimension
+        function initPainDimension(withSparkles = false, sufferMode = 'orbit') {
+            dumbScene = new THREE.Scene();
+            dumbEye = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            dumbRenderBox = new THREE.WebGLRenderer({ antialias: true });
+            dumbRenderBox.setSize(window.innerWidth, window.innerHeight);
+            dumbCanvasBoxThing.appendChild(dumbRenderBox.domElement);
+
+            dumbTimeClock = new THREE.Clock();
+
+            if (sufferMode === 'orbit') {
+                dumbControlFreak = new THREE.OrbitControls(dumbEye, dumbRenderBox.domElement);
+            } else {
+                dumbControlFreak = new THREE.FirstPersonControls(dumbEye, dumbRenderBox.domElement);
+            }
+
+            dumbEye.position.z = 3;
+
+            if (withSparkles) {
+                spawnSpeckleSkyUgly();
+            }
+
+            window.addEventListener('resize', sufferWindowResize);
+            dumbRenderBox.domElement.addEventListener('mousemove', onRodentWiggle);
+        }
+
+        // 🪦 resize the pain
+        function sufferWindowResize() {
+            dumbEye.aspect = window.innerWidth / window.innerHeight;
+            dumbEye.updateProjectionMatrix();
+            dumbRenderBox.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // 🔁 eternal loop of despair
+        function eternalAnimationLoopOfNoEscape() {
+            requestAnimationFrame(eternalAnimationLoopOfNoEscape);
+            const painDelta = dumbTimeClock.getDelta();
+            if (dumbControlFreak.update) dumbControlFreak.update(painDelta);
+            dumbRenderBox.render(dumbScene, dumbEye);
+            handleCountryHoverHell();
+        }
+
+        // ⌨️ WASD but sad
+        function keyboardWASDButMakeItSad(delta) {
+            if (dumbKeyCry['KeyW']) dumbEye.position.z -= delta;
+            if (dumbKeyCry['KeyS']) dumbEye.position.z += delta;
+            if (dumbKeyCry['KeyA']) dumbEye.position.x -= delta;
+            if (dumbKeyCry['KeyD']) dumbEye.position.x += delta;
+        }
+
+        // 🗺️ spawn ugly detailed globe
+        async function spawnUglyDetailedGlobe() {
+            const loaderPain = new THREE.TextureLoader();
+            const uglyTexture = await loaderPain.loadAsync('earth_texture.jpg');
+
+            dumbCompresso = new THREE.Mesh(
+                new THREE.SphereGeometry(1, 64, 64),
+                new THREE.MeshBasicMaterial({ map: uglyTexture })
+            );
+
+            dumbScene.add(dumbCompresso);
+        }
+
+        // 🫠 handle hover hell
+        function handleCountryHoverHell() {
+            if (!dumbLaserPointer || !dumbClickableFakeCountries.length) return;
+
+            dumbLaserPointer.setFromCamera(dumbRodent, dumbEye);
+            const collisions = dumbLaserPointer.intersectObjects(dumbClickableFakeCountries);
+
+            if (collisions.length > 0) {
+                if (Date.now() - dumbLastHoverLag > dumbHoverLagTime) {
+                    dumbCountryVictim = collisions[0].object;
+                    dumbCountryWord.textContent = dumbCountryVictim.name || "Unnamed Sadland";
+                    dumbCountryClocky.textContent = new Date().toLocaleTimeString();
+                    dumbInfoBlob.style.display = 'block';
+                    dumbLastHoverLag = Date.now();
+                }
+            } else {
+                dumbInfoBlob.style.display = 'none';
+            }
+        }
+
+        // 🐀 rodent wiggling
+        function onRodentWiggle(event) {
+            dumbRodent = new THREE.Vector2(
+                (event.clientX / window.innerWidth) * 2 - 1,
+                -(event.clientY / window.innerHeight) * 2 + 1
+            );
+            if (!dumbLaserPointer) dumbLaserPointer = new THREE.Raycaster();
+        }
+
+        // 🎱 spawn dot ball
+        function spawnStupidDotBall() {
+            const dotGeo = new THREE.SphereGeometry(0.01, 8, 8);
+            const dotMat = new THREE.MeshBasicMaterial({ color: 0xff00ff });
+            const dotMesh = new THREE.Mesh(dotGeo, dotMat);
+            dotMesh.position.set(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1);
+            dumbScene.add(dotMesh);
+            dumbClickableFakeCountries.push(dotMesh);
+        }
+
+        // 🌌 spawn speckle sky
+        function spawnSpeckleSkyUgly() {
+            const starGeo = new THREE.BufferGeometry();
+            const starCount = 2000;
+            const starPos = [];
+
+            for (let i = 0; i < starCount; i++) {
+                starPos.push((Math.random() - 0.5) * 2000);
+                starPos.push((Math.random() - 0.5) * 2000);
+                starPos.push((Math.random() - 0.5) * 2000);
+            }
+
+            starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
+            const starMat = new THREE.PointsMaterial({ color: 0x888888 });
+            const starMesh = new THREE.Points(starGeo, starMat);
+            dumbScene.add(starMesh);
+        }
+
+        // ☢️ button doom handlers
+        async function pressDotModeButton() {
+            dumbLandingHell.style.display = 'none';
+            dumbLoadingSuffering.style.display = 'block';
+            await loadPainfulScript('https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js');
+            await loadPainfulScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js');
+
+            initPainDimension(false, 'orbit');
+            await spawnUglyDetailedGlobe();
+            for (let i = 0; i < 50; i++) spawnStupidDotBall();
+            dumbLoadingSuffering.style.display = 'none';
+            eternalAnimationLoopOfNoEscape();
+        }
+
+        async function pressMovieDramaModeButton() {
+            dumbLandingHell.style.display = 'none';
+            dumbLoadingSuffering.style.display = 'block';
+            await loadPainfulScript('https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js');
+            await loadPainfulScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/FirstPersonControls.js');
+
+            initPainDimension(true, 'firstPerson');
+            await spawnUglyDetailedGlobe();
+            dumbLoadingSuffering.style.display = 'none';
+            eternalAnimationLoopOfNoEscape();
+        }
+
+        // 🚪 hook up pain buttons
+        dumbBtnYesDot.addEventListener('click', pressDotModeButton);
+        dumbBtnMovieDrama.addEventListener('click', pressMovieDramaModeButton);
+</script></body></html>
