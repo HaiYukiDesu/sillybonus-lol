@@ -1,55 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>wow why did i make this</title>
+    <title>Globe - Timezone</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <style>
         body { margin: 0; background-color: #000; overflow: hidden; color: white; font-family: monospace; }
         #canvas-container { display: none; }
-        #landing-page {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-        }
-        #landing-page h1 { font-size: 2.5rem; color: #58a6ff; }
-        #landing-page button {
-            background-color: #21262d; border: 1px solid #30362d; color: #c9d1d9;
-            padding: 15px 30px; margin: 10px; border-radius: 6px; cursor: pointer;
-            font-size: 1rem; transition: all 0.2s ease;
-        }
-        #landing-page button:hover { border-color: #8b949e; background-color: #30363d; }
-        #loading { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 1.5rem; }
+        #loading { display: block; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 1.5rem; }
         #info-box {
             display: none;
             position: absolute;
             bottom: 20px;
             left: 20px;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.7);
             padding: 10px 15px;
             border-radius: 5px;
             border: 1px solid #30362d;
+            min-width: 250px;
         }
         #country-name { font-size: 1.2rem; font-weight: bold; color: #58a6ff; }
-        #country-time { font-size: 1rem; color: #c9d1d9; }
+        #timezone-name { font-size: 0.9rem; color: #8b949e; padding-top: 4px;}
+        #country-time { font-size: 1.1rem; color: #c9d1d9; padding-top: 2px;}
+
+        #detail-box {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.85);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #58a6ff;
+            min-width: 350px;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 0 20px rgba(88, 166, 255, 0.5);
+            z-index: 1000;
+            font-size: 0.9rem;
+        }
+        #detail-box .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #30362d;
+        }
+        #detail-country-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #58a6ff;
+        }
+        #detail-close-btn {
+            background: none;
+            border: 1px solid #8b949e;
+            color: #8b949e;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        #detail-close-btn:hover {
+            background: #8b949e;
+            color: #000;
+        }
+        #detail-timezone-list {
+            list-style: none;
+            padding: 0;
+            margin: 5px 0 15px 0;
+        }
+        #detail-timezone-list li {
+            background: rgba(255,255,255,0.05);
+            padding: 5px 10px;
+            margin-bottom: 3px;
+            border-radius: 3px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #detail-timezone-list li span:first-child {
+            color: #c9d1d9;
+        }
+        #detail-timezone-list li span:last-child {
+            font-weight: bold;
+            color: #58a6ff;
+        }
+        #line-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
-    <div id="landing-page">
-        <h1>earth or world idk (send help)</h1>
-        <button id="simple-mode-btn">Simple Mode (uses no data but look awfully bad)</button>
-        <button id="cinematic-mode-btn">Cinematic Mode(uses 30 MB of data)</button>
-    </div>
-    <div id="loading">Loading data...</div>
+    <div id="loading">Loading...</div>
     <div id="canvas-container"></div>
     <div id="info-box">
         <div id="country-name"></div>
+        <div id="timezone-name"></div>
         <div id="country-time"></div>
     </div>
+    <div id="detail-box">
+        <div class="detail-header">
+            <span id="detail-country-name"></span>
+            <button id="detail-close-btn">X</button>
+        </div>
+        <div class="detail-content">
+            <p><strong>ISO Alpha-2:</strong> <span id="detail-iso-a2"></span></p>
+            <p><strong>ISO Alpha-3:</strong> <span id="detail-iso-a3"></span></p>
+            <p><strong>Timezones:</strong></p>
+            <ul id="detail-timezone-list"></ul>
+            <p><strong>Current Time:</strong> <span id="detail-current-time"></span></p>
+        </div>
+    </div>
+    <canvas id="line-canvas"></canvas>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script type="importmap">
     {
         "imports": {
@@ -67,176 +137,157 @@
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
         import { ConvexGeometry } from 'three/addons/geometries/ConvexGeometry.js';
 
-        const pleaseJustLetMeGoButton = document.getElementById('simple-mode-btn');
-        const theyHaveMyFamilyButton = document.getElementById('cinematic-mode-btn');
-        const theFirstThingYouSeeBeforeTheEnd = document.getElementById('landing-page');
-        const imBeggingYouPleaseHurry = document.getElementById('loading');
-        const theVoidWhereDreamsDie = document.getElementById('canvas-container');
-        const uselessFactsToDistractYou = document.getElementById('info-box');
-        const whereAmI = document.getElementById('country-name');
-        const howMuchTimeIsLeft = document.getElementById('country-time');
+        const loadingText = document.getElementById('loading');
+        const canvasContainer = document.getElementById('canvas-container');
+        const infoBox = document.getElementById('info-box');
+        const countryNameEl = document.getElementById('country-name');
+        const timezoneNameEl = document.getElementById('timezone-name');
+        const countryTimeEl = document.getElementById('country-time');
         
-        let theStageForThisNightmare, theAllSeeingEyeThatJudges, theThingThatMakesItAllTooReal, iHaveNoControl, theTickingBomb, theMaestroOfMisery, beamOfImminentDoom, theTremblingHand;
-        const myFingersAreShaking = {};
-        let whichButtonDoIPress;
-        let placesICanNeverGo = [];
-        let thePlaceImStuckInNow;
-        let everySecondIsAnEternity;
-        let didIJustHearSomething = 0;
-        const theSilenceIsDeafening = 100;
+        let scene, camera, renderer, controls, clock, composer, raycaster, mouse;
+        const keyState = {};
+        let interactiveHitboxes = [];
+        let countryDataMap = [];
+        let intersectedCountryIndex = -1;
+        let timeUpdateInterval;
+        let lastHoverCheck = 0;
+        const hoverCheckInterval = 100;
+        let borderLinesMaterial;
 
-        function loadThisOrElse(src) {
+        let detailBox, detailCountryNameEl, detailIsoA2El, detailIsoA3El, detailTimezoneListEl, detailCurrentTimeEl, detailCloseBtn;
+        let lineCanvas, lineCtx;
+        let activeCountryMesh;
+
+        function loadScript(src) {
             return new Promise((resolve, reject) => {
                 if (document.querySelector(`script[src="${src}"]`)) {
-                    resolve();
-                    return;
+                    resolve(); return;
                 }
                 const script = document.createElement('script');
                 script.src = src;
                 script.onload = () => resolve();
-                script.onerror = () => reject(new Error(`Script load error for ${src} AND NOW IT'S ALL OVER`));
+                script.onerror = () => reject(new Error(`Script load error for ${src}`));
                 document.body.appendChild(script);
             });
         }
 
-        function makeAPerfectCircleOrSuffer() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 64; canvas.height = 64;
+        function createCircleTexture() {
+            const canvas = document.createElement('canvas'); canvas.width = 64; canvas.height = 64;
             const context = canvas.getContext('2d');
-            context.beginPath();
-            context.arc(32, 32, 30, 0, 2 * Math.PI);
-            context.fillStyle = 'white';
-            context.fill();
+            context.beginPath(); context.arc(32, 32, 30, 0, 2 * Math.PI);
+            context.fillStyle = 'white'; context.fill();
             return new THREE.CanvasTexture(canvas);
         }
-        const theCircleOfDespair = makeAPerfectCircleOrSuffer();
+        const circleTexture = createCircleTexture();
 
-        function startThePain(useBloom = false, controlType = 'orbit') {
-            theStageForThisNightmare = new THREE.Scene();
-            theStageForThisNightmare.fog = new THREE.FogExp2(0x000000, 0.00005);
-            theAllSeeingEyeThatJudges = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 500000);
-            theThingThatMakesItAllTooReal = new THREE.WebGLRenderer({ antialias: true });
-            theThingThatMakesItAllTooReal.setSize(window.innerWidth, window.innerHeight);
-            theVoidWhereDreamsDie.appendChild(theThingThatMakesItAllTooReal.domElement);
-            theAllSeeingEyeThatJudges.position.z = 200;
+        function initScene(useBloom = false) {
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x000000, 0.00005);
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 500000);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            canvasContainer.appendChild(renderer.domElement);
+            camera.position.z = 200;
 
-            theTickingBomb = new THREE.Clock();
-            whichButtonDoIPress = controlType;
+            clock = new THREE.Clock();
             
-            iHaveNoControl = new OrbitControls(theAllSeeingEyeThatJudges, theThingThatMakesItAllTooReal.domElement);
-            iHaveNoControl.enableDamping = true;
-            iHaveNoControl.dampingFactor = 0.05;
-            
-            if (controlType === 'hybrid') {
-                iHaveNoControl.minDistance = 50;
-                iHaveNoControl.maxDistance = 200000;
-                iHaveNoControl.enablePan = true;
-                window.addEventListener('keydown', (e) => myFingersAreShaking[e.code] = true);
-                window.addEventListener('keyup', (e) => myFingersAreShaking[e.code] = false);
-            } else { 
-                iHaveNoControl.minDistance = 20;
-                iHaveNoControl.maxDistance = 400;
-            }
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true; controls.dampingFactor = 0.05;
+            controls.minDistance = 110; controls.maxDistance = 200000; controls.enablePan = true;
+            window.addEventListener('keydown', (e) => keyState[e.code] = true);
+            window.addEventListener('keyup', (e) => keyState[e.code] = false);
 
-            const renderScene = new RenderPass(theStageForThisNightmare, theAllSeeingEyeThatJudges);
-            theMaestroOfMisery = new EffectComposer(theThingThatMakesItAllTooReal);
-            theMaestroOfMisery.addPass(renderScene);
+            const renderScene = new RenderPass(scene, camera);
+            composer = new EffectComposer(renderer); composer.addPass(renderScene);
 
             if (useBloom) {
                 const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-                bloomPass.threshold = 0;
-                bloomPass.strength = 1.2;
-                bloomPass.radius = 0.5;
-                theMaestroOfMisery.addPass(bloomPass);
+                bloomPass.threshold = 0; bloomPass.strength = 1.2; bloomPass.radius = 0.5;
+                composer.addPass(bloomPass);
             }
             
-            window.addEventListener('resize', theWallsAreClosingIn);
-            keepRunningDontLookBack();
+            window.addEventListener('resize', onWindowResize);
+            animate();
         }
         
-        function theWallsAreClosingIn() {
-            theAllSeeingEyeThatJudges.aspect = window.innerWidth / window.innerHeight;
-            theAllSeeingEyeThatJudges.updateProjectionMatrix();
-            theThingThatMakesItAllTooReal.setSize(window.innerWidth, window.innerHeight);
-            theMaestroOfMisery.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        function keepRunningDontLookBack() {
-            requestAnimationFrame(keepRunningDontLookBack);
-            const delta = theTickingBomb.getDelta();
-            const now = theTickingBomb.elapsedTime * 1000;
-
-            if (whichButtonDoIPress === 'hybrid') runForYourLife(delta);
-            
-            if (beamOfImminentDoom && now - didIJustHearSomething > theSilenceIsDeafening) {
-                isAnyoneOutThere();
-                didIJustHearSomething = now;
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+            lineCanvas.width = window.innerWidth;
+            lineCanvas.height = window.innerHeight;
+            if (lineCanvas) {
+                lineCanvas.width = window.innerWidth;
+                lineCanvas.height = window.innerHeight;
+            }
+            if (detailBox && detailBox.style && detailBox.style.display === 'block' && activeCountryMesh) {
+                positionDetailBox(activeCountryMesh);
+                drawLineToDetailBox(activeCountryMesh);
             }
 
-            iHaveNoControl.update(delta);
-            theMaestroOfMisery.render();
         }
 
-        function runForYourLife(delta) {
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = clock.getDelta();
+            const now = clock.elapsedTime * 1000;
+            handleKeyboardMovement(delta);
+            if (raycaster && now - lastHoverCheck > hoverCheckInterval) {
+                handleCountryHover();
+                lastHoverCheck = now;
+            }
+            controls.update(delta);
+            composer.render();
+            if (detailBox && detailBox.style && detailBox.style.display === 'block' && activeCountryMesh) {
+                drawLineToDetailBox(activeCountryMesh);
+            }
+        }
+
+        function handleKeyboardMovement(delta) {
             const moveSpeed = 500 * delta;
-            const forward = new THREE.Vector3();
-            theAllSeeingEyeThatJudges.getWorldDirection(forward);
-            const right = new THREE.Vector3().crossVectors(theAllSeeingEyeThatJudges.up, forward).normalize();
+            const forward = new THREE.Vector3(); camera.getWorldDirection(forward);
+            const right = new THREE.Vector3().crossVectors(camera.up, forward).normalize();
             const horizontalMove = new THREE.Vector3();
-            if (myFingersAreShaking['KeyW']) horizontalMove.add(forward);
-            if (myFingersAreShaking['KeyS']) horizontalMove.sub(forward);
-            if (myFingersAreShaking['KeyD']) horizontalMove.sub(right);
-            if (myFingersAreShaking['KeyA']) horizontalMove.add(right);
+            if (keyState['KeyW']) horizontalMove.add(forward);
+            if (keyState['KeyS']) horizontalMove.sub(forward);
+            if (keyState['KeyD']) horizontalMove.sub(right);
+            if (keyState['KeyA']) horizontalMove.add(right);
             if(horizontalMove.lengthSq() > 0) {
                 horizontalMove.normalize().multiplyScalar(moveSpeed);
-                theAllSeeingEyeThatJudges.position.add(horizontalMove);
-                iHaveNoControl.target.add(horizontalMove);
+                camera.position.add(horizontalMove); controls.target.add(horizontalMove);
             }
             const verticalMove = new THREE.Vector3();
-            if (myFingersAreShaking['Space']) verticalMove.y = moveSpeed;
-            if (myFingersAreShaking['ShiftLeft']) verticalMove.y = -moveSpeed;
+            if (keyState['Space']) verticalMove.y = moveSpeed;
+            if (keyState['ShiftLeft']) verticalMove.y = -moveSpeed;
             if (verticalMove.lengthSq() > 0) {
-                theAllSeeingEyeThatJudges.position.add(verticalMove);
-                iHaveNoControl.target.add(verticalMove);
+                camera.position.add(verticalMove); controls.target.add(verticalMove);
             }
         }
         
-        async function buildTheWorldThatImprisonedMe() {
+        async function createInteractiveDetailedGlobe() {
             const globeRadius = 100;
-            
             const atmosphereGeometry = new THREE.SphereGeometry(globeRadius, 64, 64);
             const atmosphereMaterial = new THREE.MeshBasicMaterial({ color: 0x0a192f, transparent: true, opacity: 0.2 });
-            const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
-            theStageForThisNightmare.add(atmosphere);
+            scene.add(new THREE.Mesh(atmosphereGeometry, atmosphereMaterial));
 
             const geoResponse = await fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson');
             const geoData = await geoResponse.json();
+
+            const allLinePositions = [];
+            const allLineCountryIndices = [];
             
-            const borderMaterial = new THREE.PointsMaterial({ color: 0x304a6e, size: 0.3, sizeAttenuation: true });
-            const highlightMaterial = new THREE.PointsMaterial({
-                color: 0x87CEFA,
-                size: 0.6,
-                sizeAttenuation: true,
-                transparent: true,
-                blending: THREE.AdditiveBlending
-            });
-
-            geoData.features.forEach(feature => {
+            geoData.features.forEach((feature, idx) => {
                 if (!feature.geometry) return;
-                const countryObj = new THREE.Object3D();
-                countryObj.userData.name = feature.properties.ADMIN;
-                const isoA2 = feature.properties.ISO_A2;
-                countryObj.userData.iso_a2 = isoA2;
 
-                if (window.ct) {
-                    const countryTimezones = window.ct.getTimezonesForCountry(isoA2); 
-                    if (countryTimezones && countryTimezones.length > 0) {
-                        countryObj.userData.timezone = countryTimezones[0].name; 
-                    }
-                }
+                const countryName = feature.properties.name || "Unknown";
+                const isoAlpha2 = feature.properties["ISO3166-1-Alpha-2"] || "??";
+                const isoAlpha3 = feature.properties["ISO3166-1-Alpha-3"] || "???";
+
+                const countryInfo = { name: countryName, iso_a2: isoAlpha2, iso_a3: isoAlpha3 };
+                countryDataMap.push(countryInfo);
 
                 const processPolygon = (polygonRing) => {
-                    const positions = [];
                     const points3D = [];
                     for (const point of polygonRing) {
                         const [lon, lat] = point;
@@ -245,207 +296,370 @@
                         const x = -globeRadius * Math.sin(phi) * Math.cos(theta);
                         const y = globeRadius * Math.cos(phi);
                         const z = globeRadius * Math.sin(phi) * Math.sin(theta);
-                        positions.push(x, y, z);
                         points3D.push(new THREE.Vector3(x, y, z));
                     }
-                    const geometry = new THREE.BufferGeometry();
-                    geometry.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(positions), 3));
-                    
-                    const borderPoints = new THREE.Points(geometry, borderMaterial);
-                    countryObj.add(borderPoints);
 
-                    const highlightPoints = new THREE.Points(geometry.clone(), highlightMaterial);
-                    highlightPoints.visible = false;
-                    countryObj.add(highlightPoints);
+                    for (let i = 0; i < points3D.length - 1; i++) {
+                        const p1 = points3D[i]; const p2 = points3D[i + 1];
+                        allLinePositions.push(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
+                        allLineCountryIndices.push(idx, idx);
+                    }
 
                     if (points3D.length > 3) {
                         const hitboxGeometry = new ConvexGeometry(points3D);
-                        const hitboxMaterial = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 });
+                        const hitboxMaterial = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
                         const hitbox = new THREE.Mesh(hitboxGeometry, hitboxMaterial);
-                        countryObj.add(hitbox);
+                        hitbox.userData.countryIndex = idx;
+                        interactiveHitboxes.push(hitbox);
+                        scene.add(hitbox);
                     }
                 };
 
                 if (feature.geometry.type === 'Polygon') {
-                    processPolygon(feature.geometry.coordinates[0]);
+                    feature.geometry.coordinates.forEach(ring => processPolygon(ring));
                 } else if (feature.geometry.type === 'MultiPolygon') {
-                    feature.geometry.coordinates.forEach(p => processPolygon(p[0]));
+                    feature.geometry.coordinates.forEach(poly => poly.forEach(ring => processPolygon(ring)));
                 }
-                
-                placesICanNeverGo.push(countryObj);
-                theStageForThisNightmare.add(countryObj);
             });
 
-            beamOfImminentDoom = new THREE.Raycaster();
-            theTremblingHand = new THREE.Vector2();
-            window.addEventListener('mousemove', everyMoveIsBeingWatched);
-            iHaveNoControl.addEventListener('start', () => {
-                if (everySecondIsAnEternity) clearInterval(everySecondIsAnEternity);
-                uselessFactsToDistractYou.style.display = 'none';
-            });
-        }
-        
-        function isAnyoneOutThere() {
-            if (!theTremblingHand || !beamOfImminentDoom) return;
-            beamOfImminentDoom.setFromCamera(theTremblingHand, theAllSeeingEyeThatJudges);
+            const borderGeometry = new THREE.BufferGeometry();
+            borderGeometry.setAttribute('position', new THREE.Float32BufferAttribute(allLinePositions, 3));
+            borderGeometry.setAttribute('countryIndex', new THREE.Float32BufferAttribute(allLineCountryIndices, 1));
             
-            const intersects = beamOfImminentDoom.intersectObjects(placesICanNeverGo, true);
-            const hitboxIntersect = intersects.find(intersect => intersect.object.type === 'Mesh');
-
-            if (hitboxIntersect) {
-                const newIntersected = hitboxIntersect.object.parent;
-                if (thePlaceImStuckInNow !== newIntersected) {
-                    if (thePlaceImStuckInNow) {
-                        const highlight = thePlaceImStuckInNow.children[1];
-                        if (highlight) highlight.visible = false;
+            borderLinesMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    highlightedCountryIndex: { value: -1.0 },
+                    baseColor: { value: new THREE.Color(0x1d4a8e) },
+                    highlightColor: { value: new THREE.Color(0x87CEFA) },
+                },
+                vertexShader: `
+                    attribute float countryIndex;
+                    varying float vIsHighlighted;
+                    uniform float highlightedCountryIndex;
+                    void main() {
+                        vIsHighlighted = step(highlightedCountryIndex - 0.5, countryIndex) * step(countryIndex, highlightedCountryIndex + 0.5);
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
                     }
-                    
-                    thePlaceImStuckInNow = newIntersected;
-                    const highlight = thePlaceImStuckInNow.children[1];
-                    if (highlight) highlight.visible = true;
-                    document.body.style.cursor = 'pointer';
-
-                    if (everySecondIsAnEternity) clearInterval(everySecondIsAnEternity);
-                    const countryName = thePlaceImStuckInNow.userData.name;
-                    const isoA2 = thePlaceImStuckInNow.userData.iso_a2;
-                    whereAmI.textContent = countryName;
-
-                    const updateTime = () => {
-                        if (window.ct) {
-                            const timezones = window.ct.getTimezonesForCountry(isoA2); 
-                            if (timezones && timezones.length > 0) {
-                                const mainTimezone = timezones[0].name;
-                                const date = new Date();
-                                const timeString = date.toLocaleTimeString('en-GB', { timeZone: mainTimezone, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-                                howMuchTimeIsLeft.textContent = `${timeString} (${mainTimezone.split('/')[1] ? mainTimezone.split('/')[1].replace(/_/g,' ') : mainTimezone})`;
-                            } else {
-                                howMuchTimeIsLeft.textContent = "Timezone data unavailable. I'm lost.";
-                            }
+                `,
+                fragmentShader: `
+                    uniform vec3 baseColor;
+                    uniform vec3 highlightColor;
+                    varying float vIsHighlighted;
+                    void main() {
+                        if (vIsHighlighted > 0.5) {
+                            gl_FragColor = vec4(highlightColor, 1.0);
                         } else {
-                            howMuchTimeIsLeft.textContent = "Timezone library not loaded. It's hopeless.";
+                            gl_FragColor = vec4(baseColor, 0.5);
                         }
-                    };
-                    updateTime();
-                    everySecondIsAnEternity = setInterval(updateTime, 1000);
-                    uselessFactsToDistractYou.style.display = 'block';
-                }
-            } else {
-                if (thePlaceImStuckInNow) {
-                    const highlight = thePlaceImStuckInNow.children[1];
-                    if (highlight) highlight.visible = false;
-                    thePlaceImStuckInNow = null;
-                    document.body.style.cursor = 'default';
+                    }
+                `,
+                transparent: true,
+                depthTest: false
+            });
+            
+            scene.add(new THREE.LineSegments(borderGeometry, borderLinesMaterial));
+            
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('click', onMouseClick);
+            controls.addEventListener('start', () => {
+                if (timeUpdateInterval) clearInterval(timeUpdateInterval);
+                infoBox.style.display = 'none';
+            });
+        }
+        
+        function handleCountryHover() {
+            if (!mouse || !raycaster || !borderLinesMaterial) return;
+            
+            raycaster.setFromCamera(mouse, camera);
+            
+            const intersects = raycaster.intersectObjects(interactiveHitboxes);
+            let newIntersectedIndex = -1;
 
-                    if (everySecondIsAnEternity) clearInterval(everySecondIsAnEternity);
-                    uselessFactsToDistractYou.style.display = 'none';
+            if (intersects.length > 0) {
+                newIntersectedIndex = intersects[0].object.userData.countryIndex;
+            }
+
+            if (intersectedCountryIndex !== newIntersectedIndex) {
+                intersectedCountryIndex = newIntersectedIndex;
+                borderLinesMaterial.uniforms.highlightedCountryIndex.value = newIntersectedIndex;
+
+                if (timeUpdateInterval) {
+                    clearInterval(timeUpdateInterval);
+                    timeUpdateInterval = null;
+                }
+
+                if (detailBox.style.display !== 'block') {
+                    if (newIntersectedIndex !== -1) {
+                        document.body.style.cursor = 'pointer';
+                        const countryInfo = countryDataMap[newIntersectedIndex];
+                        
+                        if (window.ct) {
+                            const timezones = window.ct.getTimezonesForCountry(countryInfo.iso_a2);
+                            
+                            let countryDisplayName = countryInfo.name;
+                            if (timezones && timezones.length > 1) {
+                                countryDisplayName += ` (+${timezones.length - 1} more zones)`;
+                            }
+                            countryNameEl.textContent = countryDisplayName;
+
+                            const updateTime = () => {
+                                if (timezones && timezones.length > 0) {
+                                    const mainTimezone = timezones[0];
+                                    const date = new Date();
+                                    const timeString = date.toLocaleTimeString('en-GB', { timeZone: mainTimezone.name, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                                    
+                                    timezoneNameEl.textContent = mainTimezone.name.replace(/_/g, ' ');
+                                    countryTimeEl.textContent = timeString;
+                                } else {
+                                    timezoneNameEl.textContent = "Timezone data unavailable";
+                                    countryTimeEl.textContent = "";
+                                }
+                            };
+                            updateTime();
+                            timeUpdateInterval = setInterval(updateTime, 1000);
+                            infoBox.style.display = 'block';
+                        } else {
+                            countryNameEl.textContent = countryInfo.name;
+                            timezoneNameEl.textContent = "Timezone library not loaded.";
+                            countryTimeEl.textContent = "";
+                            infoBox.style.display = 'block';
+                        }
+                    } else {
+                        document.body.style.cursor = 'default';
+                        infoBox.style.display = 'none';
+                    }
+                } else {
+                    infoBox.style.display = 'none';
                 }
             }
         }
         
-        function everyMoveIsBeingWatched(event) {
-            if (theTremblingHand) {
-                theTremblingHand.x = (event.clientX / window.innerWidth) * 2 - 1;
-                theTremblingHand.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        function onMouseMove(event) {
+            if (mouse) {
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
             }
         }
 
-        function aSadLittleBlueDot() {
-            const positions = []; const globeRadius = 15;
-            for(let i=0;i<20000;i++){
-                const phi=Math.acos(-1+(2*i)/20000);
-                const theta=Math.sqrt(20000*Math.PI)*phi;
-                positions.push(globeRadius*Math.cos(theta)*Math.sin(phi),globeRadius*Math.sin(theta)*Math.sin(phi),globeRadius*Math.cos(phi));
+        function onMouseClick(event) {
+            if (detailBox.style.display === 'block') {
+                if (!detailBox.contains(event.target) && event.target !== detailCloseBtn) {
+                    closeDetailBox();
+                }
+                return;
             }
-            const g=new THREE.BufferGeometry();
-            g.setAttribute('position',new THREE.Float32BufferAttribute(new Float32Array(positions),3));
-            const m=new THREE.PointsMaterial({color:0x4169E1,size:0.2,sizeAttenuation:true, map: theCircleOfDespair, transparent: true, alphaTest: 0.5});
-            theStageForThisNightmare.add(new THREE.Points(g,m));
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(interactiveHitboxes);
+
+            if (intersects.length > 0) {
+                const clickedHitbox = intersects[0].object;
+                const clickedCountryIndex = clickedHitbox.userData.countryIndex;
+                const countryInfo = countryDataMap[clickedCountryIndex];
+
+                if (countryInfo) {
+                    showDetailBox(countryInfo, clickedHitbox);
+                }
+            }
         }
 
-        function theColdUncaringVoid() {
-            const positions = [];
-            for (let i = 0; i < 10000; i++) {
-                positions.push(THREE.MathUtils.randFloatSpread(1000), THREE.MathUtils.randFloatSpread(1000), THREE.MathUtils.randFloatSpread(1000));
+        function showDetailBox(countryInfo, clickedHitbox) {
+            activeCountryMesh = clickedHitbox;
+
+            detailCountryNameEl.textContent = countryInfo.name;
+            detailIsoA2El.textContent = countryInfo.iso_a2;
+            detailIsoA3El.textContent = countryInfo.iso_a3;
+
+            detailTimezoneListEl.innerHTML = '';
+            let allTimezones = [];
+            if (window.ct) {
+                allTimezones = window.ct.getTimezonesForCountry(countryInfo.iso_a2);
             }
+
+            if (allTimezones.length > 0) {
+                allTimezones.forEach(tz => {
+                    const li = document.createElement('li');
+                    const tzNameSpan = document.createElement('span');
+                    tzNameSpan.textContent = tz.name.replace(/_/g, ' ');
+                    li.appendChild(tzNameSpan);
+
+                    const tzTimeSpan = document.createElement('span');
+                    const date = new Date();
+                    tzTimeSpan.textContent = date.toLocaleTimeString('en-GB', { timeZone: tz.name, hour: '2-digit', minute: '2-digit', hour12: false });
+                    li.appendChild(tzTimeSpan);
+                    detailTimezoneListEl.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.textContent = "No timezone data available.";
+                detailTimezoneListEl.appendChild(li);
+            }
+
+            const currentTimeDate = new Date();
+            detailCurrentTimeEl.textContent = currentTimeDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+
+            detailBox.style.display = 'block';
+            infoBox.style.display = 'none';
+
+            positionDetailBox(clickedHitbox);
+            drawLineToDetailBox(clickedHitbox);
+
+            if (timeUpdateInterval) clearInterval(timeUpdateInterval);
+            timeUpdateInterval = setInterval(() => {
+                const currentTimeDate = new Date();
+                detailCurrentTimeEl.textContent = currentTimeDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                if (allTimezones.length > 0) {
+                    allTimezones.forEach((tz, index) => {
+                        const tzTimeSpan = detailTimezoneListEl.children[index]?.querySelector('span:last-child');
+                        if (tzTimeSpan) {
+                            const date = new Date();
+                            tzTimeSpan.textContent = date.toLocaleTimeString('en-GB', { timeZone: tz.name, hour: '2-digit', minute: '2-digit', hour12: false });
+                        }
+                    });
+                }
+            }, 1000);
+        }
+
+        function closeDetailBox() {
+            detailBox.style.display = 'none';
+            lineCtx.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
+            activeCountryMesh = null;
+            if (timeUpdateInterval) {
+                clearInterval(timeUpdateInterval);
+                timeUpdateInterval = null;
+            }
+            handleCountryHover();
+        }
+
+        function positionDetailBox(hitbox) {
+            const center = new THREE.Vector3();
+            hitbox.geometry.computeBoundingBox();
+            hitbox.geometry.boundingBox.getCenter(center);
+            hitbox.localToWorld(center);
+            const screenPosition = center.project(camera);
+
+            const x = (screenPosition.x * 0.5 + 0.5) * window.innerWidth;
+            const y = (-screenPosition.y * 0.5 + 0.5) * window.innerHeight;
+
+            const boxWidth = detailBox.offsetWidth;
+            const boxHeight = detailBox.offsetHeight;
+
+            let targetX = x + 100;
+            let targetY = y;
+
+            if (targetX + boxWidth > window.innerWidth - 20) {
+                targetX = x - boxWidth - 100;
+            }
+            if (targetX < 20) {
+                targetX = (window.innerWidth - boxWidth) / 2;
+            }
+
+            if (targetY + boxHeight > window.innerHeight - 20) {
+                targetY = window.innerHeight - boxHeight - 20;
+            }
+            if (targetY < 20) {
+                targetY = 20;
+            }
+
+            detailBox.style.left = `${targetX}px`;
+            detailBox.style.top = `${targetY}px`;
+            detailBox.style.transform = 'none';
+        }
+
+        function drawLineToDetailBox(hitbox) {
+            lineCtx.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
+
+            const center = new THREE.Vector3();
+            hitbox.geometry.computeBoundingBox();
+            hitbox.geometry.boundingBox.getCenter(center);
+            hitbox.localToWorld(center);
+            const screenPosition = center.project(camera);
+
+            const startX = (screenPosition.x * 0.5 + 0.5) * window.innerWidth;
+            const startY = (-screenPosition.y * 0.5 + 0.5) * window.innerHeight;
+
+            const detailBoxRect = detailBox.getBoundingClientRect();
+            const endX = detailBoxRect.left + detailBoxRect.width / 2;
+            const endY = detailBoxRect.top + detailBoxRect.height / 2;
+
+            lineCtx.strokeStyle = '#58a6ff';
+            lineCtx.lineWidth = 2;
+            lineCtx.shadowBlur = 10;
+            lineCtx.shadowColor = '#58a6ff';
+
+            lineCtx.beginPath();
+            lineCtx.moveTo(startX, startY);
+            lineCtx.lineTo(endX, endY);
+            lineCtx.stroke();
+            lineCtx.shadowBlur = 0;
+        }
+
+        async function createMainScene() {
+            initScene(true); 
+            
+            await loadScript('https://cdn.jsdelivr.net/npm/countries-and-timezones@3.8.0/dist/index.min.js');
+
+            detailBox = document.getElementById('detail-box');
+            detailCountryNameEl = document.getElementById('detail-country-name');
+            detailIsoA2El = document.getElementById('detail-iso-a2');
+            detailIsoA3El = document.getElementById('detail-iso-a3');
+            detailTimezoneListEl = document.getElementById('detail-timezone-list');
+            detailCurrentTimeEl = document.getElementById('detail-current-time');
+            detailCloseBtn = document.getElementById('detail-close-btn');
+            lineCanvas = document.getElementById('line-canvas');
+            lineCtx = lineCanvas.getContext('2d');
+            lineCanvas.width = window.innerWidth;
+            lineCanvas.height = window.innerHeight;
+            detailCloseBtn.addEventListener('click', closeDetailBox);
+
+            const binaryResponse = await fetch('./hygdata.bin');
+            if (!binaryResponse.ok) throw new Error(`HTTP error! status: ${binaryResponse.status}`);
+            
+            await createInteractiveDetailedGlobe();
+
+            const buffer = await binaryResponse.arrayBuffer(); const view = new DataView(buffer);
+            const bytesPerStar = 20; const numStars = buffer.byteLength / bytesPerStar;
+            
+            const positions = [], colors = [], sizes = []; const color = new THREE.Color();
+            for (let i = 0; i < numStars; i++) {
+                const offset = i * bytesPerStar;
+                const ra = view.getFloat32(offset, true); const dec = view.getFloat32(offset + 4, true);
+                const dist = view.getFloat32(offset + 8, true); const absmag = view.getFloat32(offset + 12, true);
+                const ci = view.getFloat32(offset + 16, true);
+
+                const raRad = ra * (15 * Math.PI / 180); const decRad = dec * (Math.PI / 180);
+                let radius = 2000 + (dist * 500); if (radius <= 2000) radius = 400000;
+                positions.push(radius * Math.cos(raRad) * Math.cos(decRad), radius * Math.sin(raRad) * Math.cos(decRad), radius * Math.sin(decRad));
+                if (ci <= -0.3) color.set(0x6070ff);
+                else if (ci <= 0.0) color.set(0x6676ff); else if (ci <= 0.3) color.set(0xffffff);
+                else if (ci <= 0.6) color.set(0xfff4f1); else if (ci <= 0.9) color.set(0xffe0c8);
+                else if (ci <= 1.5) color.set(0xffd4af); else color.set(0xffb56c);
+                colors.push(color.r, color.g, color.b);
+                let size = (8 - absmag) * 5; size = Math.max(1.5, Math.min(size, 30));
+                sizes.push(size);
+            }
+            
             const geometry = new THREE.BufferGeometry();
             geometry.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(positions), 3));
-            const material = new THREE.PointsMaterial({ color: 0xffffff, size: 0.2, map: theCircleOfDespair, transparent: true, alphaTest: 0.5 });
-            theStageForThisNightmare.add(new THREE.Points(geometry, material));
-        }
-        
-        async function chooseTheEasyWayOut() {
-            theFirstThingYouSeeBeforeTheEnd.style.display = 'none';
-            theVoidWhereDreamsDie.style.display = 'block';
-            startThePain(false, 'orbit');
-            aSadLittleBlueDot();
-            theColdUncaringVoid();
-        }
-
-        async function makeTheSufferingBeautiful() {
-            theFirstThingYouSeeBeforeTheEnd.style.display = 'none';
-            imBeggingYouPleaseHurry.style.display = 'block';
-            
-            await Promise.all([
-                loadThisOrElse('https://cdn.jsdelivr.net/npm/city-timezones@1.3.2/index.min.js'),
-                fetch('https://cdn.itbon.us/hygdata.csv').then(res => res.text())
-            ]).then(async ([_, csvText]) => {
-                const starData = Papa.parse(csvText, { header: true, dynamicTyping: true }).data;
-                
-                imBeggingYouPleaseHurry.style.display = 'none';
-                theVoidWhereDreamsDie.style.display = 'block';
-                startThePain(true, 'hybrid');
-                await buildTheWorldThatImprisonedMe();
-                
-                const positions = [], colors = [], sizes = [];
-                const color = new THREE.Color();
-
-                for (const star of starData) {
-                    if (typeof star.ra !== 'number' || typeof star.dec !== 'number' || typeof star.absmag !== 'number' || typeof star.dist !== 'number') continue;
-                    const raRad = star.ra * (15 * Math.PI / 180);
-                    const decRad = star.dec * (Math.PI / 180);
-                    let radius = 2000 + (star.dist * 500);
-                    if (radius <= 2000) radius = 400000;
-                    positions.push(radius * Math.cos(raRad) * Math.cos(decRad), radius * Math.sin(raRad) * Math.cos(decRad), radius * Math.sin(decRad));
-
-                    const ci = star.ci || 0;
-                    if (ci <= -0.3) color.set(0x6070ff);
-                    else if (ci <= 0.0) color.set(0x6676ff);
-                    else if (ci <= 0.3) color.set(0xffffff);
-                    else if (ci <= 0.6) color.set(0xfff4f1);
-                    else if (ci <= 0.9) color.set(0xffe0c8);
-                    else if (ci <= 1.5) color.set(0xffd4af);
-                    else color.set(0xffb56c);
-                    colors.push(color.r, color.g, color.b);
-
-                    let size = (8 - star.absmag) * 5;
-                    if (size < 1.5) size = 1.5;
-                    if (size > 30) size = 30;
-                    sizes.push(size);
-                }
-                
-                const geometry = new THREE.BufferGeometry();
-                geometry.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(positions), 3));
-                geometry.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(colors), 3));
-                geometry.setAttribute('pointSize', new THREE.Float32BufferAttribute(new Float32Array(sizes), 1));
-            
-                const material = new THREE.PointsMaterial({ 
-                    size: 3, vertexColors: true, sizeAttenuation: true, transparent: true, 
-                    blending: THREE.AdditiveBlending, map: theCircleOfDespair, alphaTest: 0.1
-                });
-                
-                material.onBeforeCompile = shader => {
-                    shader.vertexShader = 'attribute float pointSize;\n' + shader.vertexShader;
-                    shader.vertexShader = shader.vertexShader.replace('gl_PointSize = size;','gl_PointSize = pointSize * size;');
-                };
-                theStageForThisNightmare.add(new THREE.Points(geometry, material));
-            }).catch(error => {
-                console.error("I failed to load the resources, it's all my fault:", error);
-                imBeggingYouPleaseHurry.textContent = "Error loading. It's over. Please refresh.";
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(colors), 3));
+            geometry.setAttribute('pointSize', new THREE.Float32BufferAttribute(new Float32Array(sizes), 1));
+           
+            const material = new THREE.PointsMaterial({ 
+                size: 3, vertexColors: true, sizeAttenuation: true, transparent: true, 
+                blending: THREE.AdditiveBlending, map: circleTexture, alphaTest: 0.1
             });
-        }
+            material.onBeforeCompile = shader => {
+                shader.vertexShader = 'attribute float pointSize;\n' + shader.vertexShader;
+                shader.vertexShader = shader.vertexShader.replace('gl_PointSize = size;','gl_PointSize = pointSize * size;');
+            };
+            scene.add(new THREE.Points(geometry, material));
 
-        pleaseJustLetMeGoButton.addEventListener('click', chooseTheEasyWayOut);
-        theyHaveMyFamilyButton.addEventListener('click', makeTheSufferingBeautiful);
+            loadingText.style.display = 'none'; 
+            canvasContainer.style.display = 'block';
+        }
+        createMainScene();
     </script>
 </body>
 </html>
