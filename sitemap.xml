@@ -2,14 +2,22 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://sillybonus.lol/</loc>
+    <lastmod>2025-09-03</lastmod>
+    <priority>1.00</priority>
   </url>
   <url>
-    <loc>https:///sillybonus.lol/scripts</loc>
+    <loc>https://sillybonus.lol/globe</loc>
+    <lastmod>2025-09-03</lastmod>
+    <priority>0.90</priority>
   </url>
   <url>
-    <loc>https:///sillybonus.lol/nohello</loc>
+    <loc>https://sillybonus.lol/nohello</loc>
+    <lastmod>2025-09-03</lastmod>
+    <priority>0.80</priority>
   </url>
   <url>
-    <loc>https:///sillybonus.lol/rdd</loc>
+    <loc>https://sillybonus.lol/rdd</loc>
+    <lastmod>2025-09-03</lastmod>
+    <priority>0.80</priority>
   </url>
 </urlset>
