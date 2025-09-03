@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silly Blackjack Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .card-btn {
+            transition: all 0.15s ease-in-out;
+        }
+        .card-btn:active {
+            transform: scale(0.95);
+            background-color: #334155; /* slate-700 */
+        }
+        select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        .overflow-x-auto::-webkit-scrollbar {
+            height: 8px;
+        }
+        .overflow-x-auto::-webkit-scrollbar-track {
+            background: #1e293b; /* slate-800 */
+            border-radius: 10px;
+        }
+        .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: #334155; /* slate-700 */
+            border-radius: 10px;
+        }
+        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+            background: #475569; /* slate-600 */
+        }
+        .predictor-input {
+            transition: border-color 0.2s ease-in-out;
+            border: 2px solid #334155; /* slate-700 */
+        }
+        .predictor-input.active {
+            border-color: #22d3ee; /* cyan-400 */
+        }
+        
+        /* 3D Tilt Effect Styles */
+        .tilt-card {
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
+            position: relative;
+        }
+        .tilt-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 0.75rem; /* rounded-xl */
+            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.2s ease-out;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200 min-h-screen p-4">
+    <div class="max-w-md mx-auto" style="perspective: 1000px;">
+        <header class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-cyan-400">Silly Tool</h1>
+            <p class="text-slate-400">Blackjack Card Counter</p>
+        </header>
+        <div class="bg-slate-900 rounded-xl p-4 mb-6 shadow-lg shadow-black/20 border border-slate-800 tilt-card">
+            <div class="flex items-center justify-between">
+                <div class="flex-shrink-0">
+                    <label for="deck-amount" class="block text-sm font-medium text-slate-300 mb-1">Decks</label>
+                    <select id="deck-amount" class="bg-slate-800 border border-slate-700 rounded-md pl-3 py-1.5 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                        <option>2</option>
+                        <option selected>3</option>
+                        <option>4</option>
+                        <option>6</option>
+                        <option>8</option>
+                    </select>
+                </div>
+                <div id="game-status" class="text-center px-2">
+                    <p class="text-sm text-slate-400 font-medium">ACTION</p>
+                    <p id="action-text" class="font-bold text-lg text-amber-300">BET SMALL</p>
+                </div>
+                <button id="new-shoe-btn" class="bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-4 rounded-lg transition-colors flex-shrink-0">
+                    New Shoe
+                </button>
+            </div>
+        </div>
+        <div class="grid grid-cols-3 gap-3 text-center mb-6">
+            <div class="bg-slate-900 p-4 rounded-xl shadow-md shadow-black/20 border border-slate-800 tilt-card">
+                <p class="text-sm text-slate-400">Running Count</p>
+                <p id="running-count" class="text-3xl font-bold text-cyan-400">0</p>
+            </div>
+            <div class="bg-slate-900 p-4 rounded-xl shadow-md shadow-black/20 border border-slate-800 tilt-card">
+                <p class="text-sm text-slate-400">Cards Left</p>
+                <p id="cards-left" class="text-3xl font-bold text-slate-100">156<span id="total-cards-display" class="text-xl text-slate-500">/156</span></p>
+            </div>
+            <div class="bg-slate-900 p-4 rounded-xl shadow-md shadow-black/20 border border-slate-800 tilt-card">
+                <p class="text-sm text-slate-400">True Count</p>
+                <p id="true-count" class="text-3xl font-bold text-cyan-400">0.00</p>
+            </div>
+        </div>
+        <div class="bg-slate-900 rounded-xl p-4 mb-6 shadow-lg shadow-black/20 border border-slate-800 tilt-card">
+            <div class="bg-slate-950 rounded-md p-3 min-h-[50px] mb-4 flex items-center justify-between">
+                <p id="current-hand" class="text-xl tracking-wider text-slate-200"></p>
+                <button id="delete-btn" class="bg-slate-700 hover:bg-slate-600 p-2 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg>
+                </button>
+            </div>
+            <div id="card-buttons" class="grid grid-cols-5 gap-2 mb-4">
+                <button data-card="A" class="card-btn bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-xl p-3 rounded-md">A</button>
+                <button data-card="2" class="card-btn bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-xl p-3 rounded-md">2</button>
+                <button data-card="3" class="card-btn bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-xl p-3 rounded-md">3</button>
+                <button data-card="4" class="card-btn bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-xl p-3 rounded-md">4</button>
+                <button data-card="5" class="card-btn bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-xl p-3 rounded-md">5</button>
+                <button data-card="6" class="card-btn bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-xl p-3 rounded-md">6</button>
+                <button data-card="7" class="card-btn bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-xl p-3 rounded-md">7</button>
+                <button data-card="8" class="card-btn bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-xl p-3 rounded-md">8</button>
+                <button data-card="9" class="card-btn bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-xl p-3 rounded-md">9</button>
+                <button data-card="10" class="card-btn bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-xl p-3 rounded-md">10</button>
+                <button data-card="J" class="card-btn bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-xl p-3 rounded-md">J</button>
+                <button data-card="Q" class="card-btn bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-xl p-3 rounded-md">Q</button>
+                <button data-card="K" class="card-btn bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-xl p-3 rounded-md">K</button>
+                <button id="confirm-btn" class="col-span-2 bg-gradient-to-br from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-bold p-3 rounded-md transition-all">Confirm</button>
+            </div>
+        </div>
+        <div class="bg-slate-900 rounded-xl p-4 mb-6 shadow-lg shadow-black/20 border border-slate-800 tilt-card">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Predictor</h2>
+                 <div class="flex items-center gap-2">
+                    <button id="end-hand-btn" class="text-sm bg-gradient-to-br from-cyan-500 to-sky-600 hover:from-cyan-600 hover:to-sky-700 text-white font-semibold py-1 px-3 rounded-lg transition-all">End Hand</button>
+                    <button id="clear-predictor-btn" class="text-sm bg-slate-600 hover:bg-slate-500 text-white font-semibold py-1 px-3 rounded-lg transition-colors">Clear</button>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div id="predictor-user-input" class="predictor-input bg-slate-950 p-3 rounded-lg cursor-pointer">
+                    <p class="text-sm text-slate-400 text-center">Your Hand</p>
+                    <p id="predictor-user-hand" class="text-center text-lg min-h-[32px] text-slate-100"></p>
+                </div>
+                <div id="predictor-dealer-input" class="predictor-input bg-slate-950 p-3 rounded-lg cursor-pointer">
+                    <p class="text-sm text-slate-400 text-center">Dealer's Hand</p>
+                    <p id="predictor-dealer-hand" class="text-center text-lg min-h-[32px] text-slate-100"></p>
+                </div>
+            </div>
+            <div id="prediction-results" class="text-center">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-slate-800 p-3 rounded-lg">
+                        <p class="font-bold text-2xl text-cyan-400" id="recommendation">--</p>
+                        <p class="text-sm text-slate-400">Recommendation</p>
+                    </div>
+                    <div class="bg-slate-800 p-3 rounded-lg">
+                        <p class="font-bold text-2xl text-pink-400" id="bust-chance">0.0%</p>
+                        <p class="text-sm text-slate-400">Bust on Hit</p>
+                    </div>
+                </div>
+                 <div class="grid grid-cols-2 gap-4 mt-4">
+                    <div class="bg-slate-800 p-3 rounded-lg">
+                         <p class="font-bold text-xl text-slate-100" id="win-chance-hit">0.0%</p>
+                         <p class="text-xs text-slate-400">Win Chance (Hit)</p>
+                    </div>
+                     <div class="bg-slate-800 p-3 rounded-lg">
+                         <p class="font-bold text-xl text-slate-100" id="win-chance-stand">0.0%</p>
+                         <p class="text-xs text-slate-400">Win Chance (Stand)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bg-slate-900 rounded-xl p-4 shadow-lg shadow-black/20 border border-slate-800 tilt-card">
+            <h2 class="text-xl font-bold mb-3 text-center">Shoe Analysis</h2>
+            <div class="mb-4">
+                <p class="text-center text-slate-400 mb-1">Chance of next card being 10 or Ace</p>
+                <p id="ten-ace-prob" class="text-center text-2xl font-bold text-amber-400">0.0%</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-slate-200">
+                    <thead class="text-xs text-slate-400 uppercase bg-slate-800">
+                        <tr>
+                            <th scope="col" class="px-4 py-2">Card</th>
+                            <th scope="col" class="px-4 py-2 text-amber-300">A</th>
+                            <th scope="col" class="px-4 py-2">2</th>
+                            <th scope="col" class="px-4 py-2">3</th>
+                            <th scope="col" class="px-4 py-2">4</th>
+                            <th scope="col" class="px-4 py-2">5</th>
+                            <th scope="col" class="px-4 py-2">6</th>
+                            <th scope="col" class="px-4 py-2">7</th>
+                            <th scope="col" class="px-4 py-2">8</th>
+                            <th scope="col" class="px-4 py-2">9</th>
+                            <th scope="col" class="px-4 py-2 text-amber-300">10</th>
+                        </tr>
+                    </thead>
+                    <tbody id="analysis-table-body">
+                        <tr class="border-b border-slate-700">
+                            <th scope="row" class="px-4 py-2 font-medium whitespace-nowrap text-slate-100">Left</th>
+                            <td data-card-left="A" class="px-4 py-2 text-amber-300 font-bold">12</td>
+                            <td data-card-left="2" class="px-4 py-2">12</td>
+                            <td data-card-left="3" class="px-4 py-2">12</td>
+                            <td data-card-left="4" class="px-4 py-2">12</td>
+                            <td data-card-left="5" class="px-4 py-2">12</td>
+                            <td data-card-left="6" class="px-4 py-2">12</td>
+                            <td data-card-left="7" class="px-4 py-2">12</td>
+                            <td data-card-left="8" class="px-4 py-2">12</td>
+                            <td data-card-left="9" class="px-4 py-2">12</td>
+                            <td data-card-left="10" class="px-4 py-2 text-amber-300 font-bold">48</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    let deckCount = 3;
+    let totalCards = 156;
+    let cardsLeft = 156;
+    let runningCount = 0;
+    let trueCount = 0;
+    let shoe = {};
+    let currentHand = [];
+    let predictorUserHand = [];
+    let predictorDealerHand = [];
+    let activePredictorInput = null;
+    const cardValues = { 'A': -1, '2': 1, '3': 1, '4': 1, '5': 1, '6': 1, '7': 0, '8': 0, '9': 0, '10': -1, 'J': -1, 'Q': -1, 'K': -1 };
+    const cardPoints = { 'A': 11, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 10, 'Q': 10, 'K': 10 };
+    const cardRanks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+    const tenRanks = ['10', 'J', 'Q', 'K'];
+    const deckSelector = document.getElementById('deck-amount');
+    const newShoeBtn = document.getElementById('new-shoe-btn');
+    const runningCountEl = document.getElementById('running-count');
+    const cardsLeftEl = document.getElementById('cards-left');
+    const trueCountEl = document.getElementById('true-count');
+    const currentHandEl = document.getElementById('current-hand');
+    const deleteBtn = document.getElementById('delete-btn');
+    const cardButtonsContainer = document.getElementById('card-buttons');
+    const confirmBtn = document.getElementById('confirm-btn');
+    const tenAceProbEl = document.getElementById('ten-ace-prob');
+    const actionTextEl = document.getElementById('action-text');
+    const predictorUserInput = document.getElementById('predictor-user-input');
+    const predictorDealerInput = document.getElementById('predictor-dealer-input');
+    const predictorUserHandEl = document.getElementById('predictor-user-hand');
+    const predictorDealerHandEl = document.getElementById('predictor-dealer-hand');
+    const clearPredictorBtn = document.getElementById('clear-predictor-btn');
+    const endHandBtn = document.getElementById('end-hand-btn');
+    const recommendationEl = document.getElementById('recommendation');
+    const bustChanceEl = document.getElementById('bust-chance');
+    const winChanceHitEl = document.getElementById('win-chance-hit');
+    const winChanceStandEl = document.getElementById('win-chance-stand');
+    const getHandValue = (hand) => {
+        let sum = hand.reduce((acc, card) => acc + cardPoints[card], 0);
+        let aces = hand.filter(card => card === 'A').length;
+        while (sum > 21 && aces > 0) {
+            sum -= 10;
+            aces--;
+        }
+        return sum;
+    };
+    const updateUI = () => {
+        runningCountEl.textContent = runningCount > 0 ? `+${runningCount}` : runningCount;
+        cardsLeftEl.innerHTML = `${cardsLeft}<span class="text-xl text-slate-500">/${totalCards}</span>`;
+        const decksRemaining = cardsLeft / 52;
+        trueCount = decksRemaining > 0 ? runningCount / decksRemaining : 0;
+        trueCountEl.textContent = trueCount.toFixed(2);
+        currentHandEl.textContent = currentHand.join(', ');
+        document.querySelectorAll('[data-card-left]').forEach(td => {
+            const card = td.getAttribute('data-card-left');
+            td.textContent = shoe[card === '10' ? '10' : card];
+        });
+        if (cardsLeft > 0) {
+            const highCardsLeft = shoe['A'] + shoe['10'];
+            tenAceProbEl.textContent = `${((highCardsLeft / cardsLeft) * 100).toFixed(1)}%`;
+        } else {
+            tenAceProbEl.textContent = '0.0%';
+        }
+        
+        actionTextEl.classList.remove('text-amber-300', 'text-pink-500', 'text-transparent', 'bg-clip-text', 'bg-gradient-to-r', 'from-lime-300', 'to-green-400');
+        actionTextEl.style.backgroundImage = '';
+
+        if (trueCount >= 2) {
+            actionTextEl.textContent = 'BET BIG';
+            actionTextEl.classList.add('text-transparent', 'bg-clip-text', 'bg-gradient-to-r', 'from-lime-300', 'to-green-400');
+        } else if (trueCount <= -2) {
+            actionTextEl.textContent = 'BAD DECK';
+            actionTextEl.classList.add('text-pink-500');
+        } else {
+            actionTextEl.textContent = 'BET SMALL';
+            actionTextEl.classList.add('text-amber-300');
+        }
+
+        predictorUserHandEl.textContent = predictorUserHand.join(', ');
+        predictorDealerHandEl.textContent = predictorDealerHand.join(', ');
+        predictorUserInput.classList.toggle('active', activePredictorInput === 'user');
+        predictorDealerInput.classList.toggle('active', activePredictorInput === 'dealer');
+    };
+    const clearPredictor = () => {
+        predictorUserHand = [];
+        predictorDealerHand = [];
+        activePredictorInput = null;
+        recommendationEl.textContent = '--';
+        bustChanceEl.textContent = '0.0%';
+        winChanceHitEl.textContent = '0.0%';
+        winChanceStandEl.textContent = '0.0%';
+        updateUI();
+    };
+    const resetShoe = () => {
+        deckCount = parseInt(deckSelector.value);
+        totalCards = deckCount * 52;
+        cardsLeft = totalCards;
+        runningCount = 0;
+        trueCount = 0;
+        currentHand = [];
+        shoe = { 'A': 4 * deckCount, '2': 4 * deckCount, '3': 4 * deckCount, '4': 4 * deckCount, '5': 4 * deckCount, '6': 4 * deckCount, '7': 4 * deckCount, '8': 4 * deckCount, '9': 4 * deckCount, '10': 16 * deckCount };
+        clearPredictor();
+        updateUI();
+    };
+    const getDealerOutcomes = (dealerHand, currentShoe, remainingCards) => {
+        const outcomes = {};
+        const memo = {};
+        const simulate = (hand, shoeState, remaining) => {
+            const handKey = hand.slice().sort().join(',');
+            if (memo[handKey]) return memo[handKey];
+            const value = getHandValue(hand);
+            if (value >= 17) {
+                return { [value]: 1 };
+            }
+            const currentOutcomes = {};
+            cardRanks.forEach(rank => {
+                const effectiveRank = tenRanks.includes(rank) ? '10' : rank;
+                const count = shoeState[effectiveRank];
+                if (count > 0) {
+                    const prob = count / remaining;
+                    const newHand = [...hand, rank];
+                    const newShoe = { ...shoeState };
+                    newShoe[effectiveRank]--;
+                    const subOutcomes = simulate(newHand, newShoe, remaining - 1);
+                    for (const score in subOutcomes) {
+                        currentOutcomes[score] = (currentOutcomes[score] || 0) + prob * subOutcomes[score];
+                    }
+                }
+            });
+            return memo[handKey] = currentOutcomes;
+        };
+        const rawOutcomes = simulate(dealerHand, currentShoe, remainingCards);
+        for(const scoreStr in rawOutcomes) {
+            const score = parseInt(scoreStr);
+            if(score > 21) outcomes['bust'] = (outcomes['bust'] || 0) + rawOutcomes[scoreStr];
+            else outcomes[score] = (outcomes[score] || 0) + rawOutcomes[scoreStr];
+        }
+        return outcomes;
+    };
+    const runPrediction = () => {
+        if (predictorUserHand.length < 1 || predictorDealerHand.length < 1) return;
+        const tempShoe = { ...shoe };
+        let tempCardsLeft = cardsLeft;
+        [...predictorUserHand, ...predictorDealerHand].forEach(card => {
+            const rank = tenRanks.includes(card) ? '10' : card;
+            if (tempShoe[rank] > 0) {
+                tempShoe[rank]--;
+                tempCardsLeft--;
+            }
+        });
+        if(tempCardsLeft <= 0) return;
+        const userValue = getHandValue(predictorUserHand);
+        let bustCards = 0;
+        cardRanks.forEach(rank => {
+            const newHand = [...predictorUserHand, rank];
+            if (getHandValue(newHand) > 21) {
+                const effectiveRank = tenRanks.includes(rank) ? '10' : rank;
+                bustCards += tempShoe[effectiveRank];
+            }
+        });
+        bustChanceEl.textContent = `${((bustCards / tempCardsLeft) * 100).toFixed(1)}%`;
+        const dealerOutcomes = getDealerOutcomes(predictorDealerHand, tempShoe, tempCardsLeft);
+        let standWinProb = dealerOutcomes['bust'] || 0;
+        for (const score in dealerOutcomes) {
+            if (score !== 'bust' && userValue > parseInt(score)) {
+                standWinProb += dealerOutcomes[score];
+            }
+        }
+        winChanceStandEl.textContent = `${(standWinProb * 100).toFixed(1)}%`;
+        let hitWinProb = 0;
+        cardRanks.forEach(rank => {
+            const effectiveRank = tenRanks.includes(rank) ? '10' : rank;
+            const count = tempShoe[effectiveRank];
+            if (count > 0) {
+                const prob = count / tempCardsLeft;
+                const newUserHand = [...predictorUserHand, rank];
+                const newUserValue = getHandValue(newUserHand);
+                if (newUserValue <= 21) {
+                    const newShoe = { ...tempShoe };
+                    newShoe[effectiveRank]--;
+                    const newDealerOutcomes = getDealerOutcomes(predictorDealerHand, newShoe, tempCardsLeft - 1);
+                    let winProbForPath = newDealerOutcomes['bust'] || 0;
+                    for (const score in newDealerOutcomes) {
+                        if (score !== 'bust' && newUserValue > parseInt(score)) {
+                            winProbForPath += newDealerOutcomes[score];
+                        }
+                    }
+                    hitWinProb += prob * winProbForPath;
+                }
+            }
+        });
+        winChanceHitEl.textContent = `${(hitWinProb * 100).toFixed(1)}%`;
+        recommendationEl.textContent = hitWinProb > standWinProb ? 'HIT' : 'STAND';
+    };
+    const handleCardClick = (card) => {
+        if (activePredictorInput) {
+            if (activePredictorInput === 'user') predictorUserHand.push(card);
+            else if (activePredictorInput === 'dealer') predictorDealerHand.push(card);
+            runPrediction();
+        } else {
+            currentHand.push(card);
+        }
+        updateUI();
+    };
+    const handleEndHand = () => {
+        const playedCards = [...predictorUserHand, ...predictorDealerHand];
+        if (playedCards.length === 0) return;
+        playedCards.forEach(card => {
+            const cardRank = tenRanks.includes(card) ? '10' : card;
+            if (shoe[cardRank] > 0) {
+                shoe[cardRank]--;
+                runningCount += cardValues[card];
+                cardsLeft--;
+            }
+        });
+        clearPredictor();
+    };
+    deckSelector.addEventListener('change', resetShoe);
+    newShoeBtn.addEventListener('click', resetShoe);
+    cardButtonsContainer.addEventListener('click', (e) => {
+        if (e.target.matches('button[data-card]')) handleCardClick(e.target.dataset.card);
+    });
+    deleteBtn.addEventListener('click', () => {
+        if (currentHand.length > 0) {
+            currentHand.pop();
+            updateUI();
+        }
+    });
+    confirmBtn.addEventListener('click', () => {
+        if (currentHand.length === 0) return;
+        currentHand.forEach(card => {
+            const cardRank = tenRanks.includes(card) ? '10' : card;
+            if (shoe[cardRank] > 0) {
+                shoe[cardRank]--;
+                runningCount += cardValues[card];
+                cardsLeft--;
+            }
+        });
+        currentHand = [];
+        clearPredictor();
+    });
+    predictorUserInput.addEventListener('click', () => { activePredictorInput = 'user'; updateUI(); });
+    predictorDealerInput.addEventListener('click', () => { activePredictorInput = 'dealer'; updateUI(); });
+    clearPredictorBtn.addEventListener('click', clearPredictor);
+    endHandBtn.addEventListener('click', handleEndHand);
+    resetShoe();
+
+    const tiltCards = document.querySelectorAll('.tilt-card');
+    tiltCards.forEach(card => {
+        const C_TILT_MAX = 2.5;
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const width = card.offsetWidth;
+            const height = card.offsetHeight;
+
+            const rotateX = C_TILT_MAX * ((y / height) - 0.5);
+            const rotateY = -C_TILT_MAX * ((x / width) - 0.5);
+            
+            card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+
+            const glow = card.querySelector('::before');
+            if (glow) {
+                glow.style.left = `${x}px`;
+                glow.style.top = `${y}px`;
+                glow.style.opacity = '1';
+            }
+        });
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'rotateX(0deg) rotateY(0deg)';
+             const glow = card.querySelector('::before');
+            if (glow) {
+                 glow.style.opacity = '0';
+            }
+        });
+    });
+});
+</script>
+</body>
+</html>
+
