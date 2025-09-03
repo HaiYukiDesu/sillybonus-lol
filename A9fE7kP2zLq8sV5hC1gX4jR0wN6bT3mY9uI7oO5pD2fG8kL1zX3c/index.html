@@ -15,13 +15,17 @@
         body {
             font-family: 'JetBrains Mono', monospace;
             -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
         .card-btn {
             transition: all 0.15s ease-in-out;
         }
         .card-btn:active {
             transform: scale(0.95);
-            background-color: #334155; /* slate-700 */
+            background-color: #334155;
         }
         select {
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
@@ -37,25 +41,24 @@
             height: 8px;
         }
         .overflow-x-auto::-webkit-scrollbar-track {
-            background: #1e293b; /* slate-800 */
+            background: #1e293b;
             border-radius: 10px;
         }
         .overflow-x-auto::-webkit-scrollbar-thumb {
-            background: #334155; /* slate-700 */
+            background: #334155;
             border-radius: 10px;
         }
         .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-            background: #475569; /* slate-600 */
+            background: #475569;
         }
         .predictor-input {
             transition: border-color 0.2s ease-in-out;
-            border: 2px solid #334155; /* slate-700 */
+            border: 2px solid #334155;
         }
         .predictor-input.active {
-            border-color: #22d3ee; /* cyan-400 */
+            border-color: #22d3ee;
         }
         
-        /* 3D Tilt Effect Styles */
         .tilt-card {
             transform-style: preserve-3d;
             transition: transform 0.1s ease-out;
@@ -68,7 +71,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            border-radius: 0.75rem; /* rounded-xl */
+            border-radius: 0.75rem;
             background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(255, 255, 255, 0.1), transparent 60%);
             opacity: 0;
             transition: opacity 0.2s ease-out;
@@ -290,10 +293,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             tenAceProbEl.textContent = '0.0%';
         }
-        
         actionTextEl.classList.remove('text-amber-300', 'text-pink-500', 'text-transparent', 'bg-clip-text', 'bg-gradient-to-r', 'from-lime-300', 'to-green-400');
         actionTextEl.style.backgroundImage = '';
-
         if (trueCount >= 2) {
             actionTextEl.textContent = 'BET BIG';
             actionTextEl.classList.add('text-transparent', 'bg-clip-text', 'bg-gradient-to-r', 'from-lime-300', 'to-green-400');
@@ -304,7 +305,6 @@ document.addEventListener('DOMContentLoaded', () => {
             actionTextEl.textContent = 'BET SMALL';
             actionTextEl.classList.add('text-amber-300');
         }
-
         predictorUserHandEl.textContent = predictorUserHand.join(', ');
         predictorDealerHandEl.textContent = predictorDealerHand.join(', ');
         predictorUserInput.classList.toggle('active', activePredictorInput === 'user');
@@ -329,7 +329,6 @@ document.addEventListener('DOMContentLoaded', () => {
         currentHand = [];
         shoe = { 'A': 4 * deckCount, '2': 4 * deckCount, '3': 4 * deckCount, '4': 4 * deckCount, '5': 4 * deckCount, '6': 4 * deckCount, '7': 4 * deckCount, '8': 4 * deckCount, '9': 4 * deckCount, '10': 16 * deckCount };
         clearPredictor();
-        updateUI();
     };
     const getDealerOutcomes = (dealerHand, currentShoe, remainingCards) => {
         const outcomes = {};
@@ -444,17 +443,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         clearPredictor();
     };
+
     deckSelector.addEventListener('change', resetShoe);
     newShoeBtn.addEventListener('click', resetShoe);
-    cardButtonsContainer.addEventListener('click', (e) => {
-        if (e.target.matches('button[data-card]')) handleCardClick(e.target.dataset.card);
-    });
+    
+    const handleButtonClick = (e) => {
+        e.preventDefault();
+        const button = e.target.closest('button[data-card]');
+        if (button) {
+             handleCardClick(button.dataset.card);
+        }
+    }
+    cardButtonsContainer.addEventListener('mousedown', handleButtonClick);
+    cardButtonsContainer.addEventListener('touchstart', handleButtonClick, { passive: true });
+
     deleteBtn.addEventListener('click', () => {
         if (currentHand.length > 0) {
             currentHand.pop();
             updateUI();
         }
     });
+
     confirmBtn.addEventListener('click', () => {
         if (currentHand.length === 0) return;
         currentHand.forEach(card => {
@@ -468,10 +477,18 @@ document.addEventListener('DOMContentLoaded', () => {
         currentHand = [];
         clearPredictor();
     });
-    predictorUserInput.addEventListener('click', () => { activePredictorInput = 'user'; updateUI(); });
-    predictorDealerInput.addEventListener('click', () => { activePredictorInput = 'dealer'; updateUI(); });
+
+    predictorUserInput.addEventListener('click', () => { 
+        activePredictorInput = 'user'; 
+        updateUI(); 
+    });
+    predictorDealerInput.addEventListener('click', () => { 
+        activePredictorInput = 'dealer'; 
+        updateUI(); 
+    });
     clearPredictorBtn.addEventListener('click', clearPredictor);
     endHandBtn.addEventListener('click', handleEndHand);
+    
     resetShoe();
 
     const tiltCards = document.querySelectorAll('.tilt-card');
@@ -501,3 +518,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
