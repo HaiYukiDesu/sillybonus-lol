@@ -69,10 +69,13 @@
             width: 100%;
             height: 100%;
             border-radius: 0.75rem; /* rounded-xl */
-            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1), transparent 60%);
+            background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(255, 255, 255, 0.1), transparent 60%);
             opacity: 0;
             transition: opacity 0.2s ease-out;
             pointer-events: none;
+        }
+        .tilt-card.is-hovering::before {
+            opacity: 1;
         }
     </style>
 </head>
@@ -119,7 +122,7 @@
         </div>
         <div class="bg-slate-900 rounded-xl p-4 mb-6 shadow-lg shadow-black/20 border border-slate-800 tilt-card">
             <div class="bg-slate-950 rounded-md p-3 min-h-[50px] mb-4 flex items-center justify-between">
-                <p id="current-hand" class="text-xl tracking-wider text-slate-200"></p>
+                <p id="current-hand" class="font-mono text-xl tracking-wider text-slate-200"></p>
                 <button id="delete-btn" class="bg-slate-700 hover:bg-slate-600 p-2 rounded-full">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg>
                 </button>
@@ -152,11 +155,11 @@
             <div class="grid grid-cols-2 gap-4 mb-4">
                 <div id="predictor-user-input" class="predictor-input bg-slate-950 p-3 rounded-lg cursor-pointer">
                     <p class="text-sm text-slate-400 text-center">Your Hand</p>
-                    <p id="predictor-user-hand" class="text-center text-lg min-h-[32px] text-slate-100"></p>
+                    <p id="predictor-user-hand" class="font-mono text-center text-lg min-h-[32px] text-slate-100"></p>
                 </div>
                 <div id="predictor-dealer-input" class="predictor-input bg-slate-950 p-3 rounded-lg cursor-pointer">
                     <p class="text-sm text-slate-400 text-center">Dealer's Hand</p>
-                    <p id="predictor-dealer-hand" class="text-center text-lg min-h-[32px] text-slate-100"></p>
+                    <p id="predictor-dealer-hand" class="font-mono text-center text-lg min-h-[32px] text-slate-100"></p>
                 </div>
             </div>
             <div id="prediction-results" class="text-center">
@@ -473,36 +476,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const tiltCards = document.querySelectorAll('.tilt-card');
     tiltCards.forEach(card => {
-        const C_TILT_MAX = 2.5;
+        const C_TILT_MAX = 10;
         card.addEventListener('mousemove', (e) => {
             const rect = card.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
             const width = card.offsetWidth;
             const height = card.offsetHeight;
-
             const rotateX = C_TILT_MAX * ((y / height) - 0.5);
             const rotateY = -C_TILT_MAX * ((x / width) - 0.5);
-            
             card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-
-            const glow = card.querySelector('::before');
-            if (glow) {
-                glow.style.left = `${x}px`;
-                glow.style.top = `${y}px`;
-                glow.style.opacity = '1';
-            }
+            card.style.setProperty('--x', `${(x / width) * 100}%`);
+            card.style.setProperty('--y', `${(y / height) * 100}%`);
+        });
+        card.addEventListener('mouseenter', () => {
+            card.classList.add('is-hovering');
         });
         card.addEventListener('mouseleave', () => {
             card.style.transform = 'rotateX(0deg) rotateY(0deg)';
-             const glow = card.querySelector('::before');
-            if (glow) {
-                 glow.style.opacity = '0';
-            }
+            card.classList.remove('is-hovering');
         });
     });
 });
 </script>
 </body>
 </html>
-
