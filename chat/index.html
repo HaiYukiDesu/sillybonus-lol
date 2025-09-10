@@ -231,7 +231,7 @@
             const isError = messageContent.startsWith("[Decryption failed");
             div.className = 'message-line' + (data.user === 'System' ? ' system' : '') + (isError ? ' error' : '');
             const time = data.timestamp ? new Date(data.timestamp).toLocaleTimeString() : new Date().toLocaleTimeString();
-            div.innerHTML = `<span class="timestamp">${time}</span> <span class="user">${data.user}:</span> <span class="message">${messageContent}</span>`;
+            div.innerHTML = `<span class="timestamp">${time}</span> <span class="user">${data.userId}:</span> <span class="message">${messageContent}</span>`;
             messagesDiv.appendChild(div);
             if (!isHistory) {
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
