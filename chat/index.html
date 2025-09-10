@@ -174,7 +174,7 @@
                 chatRoomTitle.textContent = `Room: ${roomState.roomName}`;
                 showView('chat-view');
                 messagesDiv.innerHTML = '';
-                appendMessage({ userId: "[System]", message: `Joining room '${roomState.roomName}'...` });
+                appendMessage({ userId: "System", message: `Joining room '${roomState.roomName}'...` });
                 const historyRes = await fetch(`${API_BASE}/api/history?room=${roomState.roomName}`);
                 const history = await historyRes.json();
                 for (const msg of history) {
@@ -190,7 +190,7 @@
             const wsURL = `${WS_BASE}/websocket?room=${roomState.roomName}&userId=${roomState.userId}`;
             const ws = new WebSocket(wsURL);
             ws.addEventListener("open", () => {
-                appendMessage({ userId: "[System]", message: `Live connection established.` });
+                appendMessage({ userId: "System", message: `Live connection established.` });
                 input.disabled = false;
                 sendBtn.disabled = false;
                 input.focus();
@@ -201,7 +201,7 @@
                 appendMessage(data);
             });
             ws.addEventListener("close", () => {
-                appendMessage({ userId: "[System]", message: "Live connection lost. Please refresh." });
+                appendMessage({ userId: "System", message: "Live connection lost. Please refresh." });
                 input.disabled = true;
                 sendBtn.disabled = true;
             });
