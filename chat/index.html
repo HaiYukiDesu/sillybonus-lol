@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>dumb ahh chat</title>
+    <title>Silly Chat</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; margin: 0; background-color: #f4f4f5; color: #18181b; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
@@ -11,31 +11,17 @@
         .view.active { display: block; }
         .card { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 2em; }
         h1, h2 { text-align: center; color: #3f3f46; }
-        .button-group { display: flex; flex-direction: column; gap: 1em; margin-top: 2em; }
         button { border: none; background-color: #6d28d9; color: white; padding: 1em; border-radius: 8px; cursor: pointer; transition: background-color 0.2s; font-size: 1em; font-weight: 500; }
-        button:hover { background-color: #5b21b6; }
-        button:disabled { background-color: #a78bfa; cursor: not-allowed; }
         .input-group { margin-bottom: 1em; }
         label { display: block; margin-bottom: 0.5em; font-weight: 500; color: #52525b; }
         input[type="text"], input[type="password"] { width: 100%; padding: 0.8em; border: 1px solid #d4d4d8; border-radius: 6px; box-sizing: border-box; }
-        input[type="checkbox"] { margin-right: 0.5em; }
-        textarea { width: 100%; padding: 0.8em; border: 1px solid #d4d4d8; border-radius: 6px; box-sizing: border-box; min-height: 80px; }
-        .back-button { background: none; color: #6d28d9; padding: 0.5em 0; font-weight: 500; text-align: left; }
-        #messages { height: 400px; overflow-y: scroll; padding: 15px; border-bottom: 1px solid #e4e4e7; }
-        .message-line { margin-bottom: 8px; }
-        .timestamp { font-size: 0.75em; color: #71717a; margin-right: 8px; }
-        .user { font-weight: bold; }
-        .system .user { color: #6d28d9; }
-        .error .message { color: #be123c; font-style: italic; }
-        .input-area { display: flex; padding-top: 15px; }
-        #input { flex-grow: 1; border-radius: 6px 0 0 6px; }
-        #send { border-radius: 0 6px 6px 0; }
+        .key-display { background-color: #f4f4f5; padding: 1em; border-radius: 6px; word-wrap: break-word; font-family: monospace; margin-top: 1em; border: 1px solid #e4e4e7; }
     </style>
 </head>
 <body>
     <div class="app-container">
         <div id="landing-view" class="view active card">
-            <h1>Welcome to dumb ahh Chat</h1>
+            <h1>Welcome to Silly Chat</h1>
             <div class="button-group">
                 <button id="show-create-btn">Create a New Room</button>
                 <button id="show-join-btn">Join an Existing Room</button>
@@ -45,7 +31,7 @@
             <h2>Create New Room</h2>
             <div class="input-group">
                 <label for="create-room-name">Room Name</label>
-                <input type="text" id="create-room-name" placeholder="my-secret-room">
+                <input type="text" id="create-room-name" placeholder="my-silly-room">
             </div>
             <div class="input-group">
                 <label for="create-user-id">Your User ID</label>
@@ -54,9 +40,9 @@
             <div class="input-group">
                 <label><input type="checkbox" id="create-e2ee"> Enable End-to-End Encryption</label>
             </div>
-            <div class="input-group">
-                <label for="create-whitelist">Whitelist (User IDs, one per line)</label>
-                <textarea id="create-whitelist" placeholder="user-beta&#10;user-gamma"></textarea>
+            <div id="salt-input-group" class="input-group" style="display: none;">
+                <label for="create-salt-phrase">Secret Salt Phrase (to generate key)</label>
+                <input type="password" id="create-salt-phrase">
             </div>
             <div class="button-group">
                 <button id="create-room-btn">Create Room</button>
@@ -67,11 +53,11 @@
             <h2>Join Room</h2>
             <div class="input-group">
                 <label for="join-room-name">Room Name</label>
-                <input type="text" id="join-room-name" placeholder="my-secret-room">
+                <input type="text" id="join-room-name">
             </div>
             <div class="input-group">
                 <label for="join-user-id">Your User ID</label>
-                <input type="text" id="join-user-id" placeholder="user-beta">
+                <input type="text" id="join-user-id">
             </div>
             <div class="button-group">
                 <button id="join-room-btn">Join Room</button>
@@ -80,8 +66,8 @@
         </div>
         <div id="chat-view" class="view card">
             <h2 id="chat-room-title"></h2>
-            <div id="messages"></div>
-            <div class="input-area">
+            <div id="messages" style="height: 400px; overflow-y: scroll; padding: 15px; border-bottom: 1px solid #e4e4e7;"></div>
+            <div class="input-area" style="display: flex; padding-top: 15px;">
                 <input id="input" placeholder="Type a message..." autocomplete="off" disabled />
                 <button id="send" disabled>Send</button>
             </div>
@@ -96,12 +82,7 @@
         const messagesDiv = document.getElementById("messages");
         const input = document.getElementById("input");
         const sendBtn = document.getElementById("send");
-        let roomState = {
-            roomName: '',
-            userId: '',
-            isE2EE: false,
-            encryptionKey: null
-        };
+        let roomState = {};
         function showView(viewId) {
             views.forEach(v => v.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
@@ -109,13 +90,17 @@
         document.getElementById('show-create-btn').onclick = () => showView('create-view');
         document.getElementById('show-join-btn').onclick = () => showView('join-view');
         document.querySelectorAll('.back-button').forEach(btn => btn.onclick = () => showView('landing-view'));
-        async function deriveKey(password, personalSalt) {
+        async function generateAndExportKey(password, salt) {
             const encoder = new TextEncoder();
-            const combinedSaltString = `${roomState.roomName}-${personalSalt}`;
-            const combinedSaltBuffer = encoder.encode(combinedSaltString);
-            const finalSalt = await crypto.subtle.digest("SHA-256", combinedSaltBuffer);
             const keyMaterial = await crypto.subtle.importKey("raw", encoder.encode(password), { name: "PBKDF2" }, false, ["deriveKey"]);
-            return crypto.subtle.deriveKey({ name: "PBKDF2", salt: finalSalt, iterations: 100000, hash: "SHA-256" }, keyMaterial, { name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
+            const saltBuffer = encoder.encode(salt);
+            const derivedKey = await crypto.subtle.deriveKey({ name: "PBKDF2", salt: saltBuffer, iterations: 100000, hash: "SHA-256" }, keyMaterial, { name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
+            const exportedKey = await crypto.subtle.exportKey("raw", derivedKey);
+            return btoa(String.fromCharCode.apply(null, new Uint8Array(exportedKey)));
+        }
+        async function importKey(keyB64) {
+            const keyBytes = Uint8Array.from(atob(keyB64), c => c.charCodeAt(0));
+            return crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
         }
         async function encryptMessage(message) {
             if (!roomState.encryptionKey) return null;
@@ -136,25 +121,30 @@
                 const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, roomState.encryptionKey, ciphertext);
                 return new TextDecoder().decode(decrypted);
             } catch (e) {
-                return "[Decryption failed: wrong key or salt phrase?]";
+                return "[Decryption failed: wrong key?]";
             }
         }
+        document.getElementById('create-e2ee').onchange = (e) => {
+            document.getElementById('salt-input-group').style.display = e.target.checked ? 'block' : 'none';
+        };
         document.getElementById('create-room-btn').onclick = async () => {
             const roomName = document.getElementById('create-room-name').value.trim();
             const creatorId = document.getElementById('create-user-id').value.trim();
             const e2ee_enabled = document.getElementById('create-e2ee').checked;
-            const whitelist = document.getElementById('create-whitelist').value.split('\n').map(u => u.trim()).filter(Boolean);
-            if (!roomName || !creatorId) return alert("Room Name and User ID are required.");
-            const response = await fetch(`${API_BASE}/api/create-room`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ roomName, creatorId, e2ee_enabled, whitelist }),
-            });
+            let shareableKey = null;
+            if (e2ee_enabled) {
+                const saltPhrase = document.getElementById('create-salt-phrase').value;
+                if (!saltPhrase) return alert("A secret salt phrase is required to generate the encryption key.");
+                shareableKey = await generateAndExportKey(saltPhrase, roomName);
+            }
+            const response = await fetch(`${API_BASE}/api/create-room`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ roomName, creatorId, e2ee_enabled, whitelist: [] }) });
             if (response.ok) {
-                alert(`Room '${roomName}' created! You can now join it.`);
+                let successMessage = `Room '${roomName}' created!`;
+                if (shareableKey) {
+                    successMessage += `\n\nIMPORTANT: Securely share this encryption key with other users:\n\n${shareableKey}`;
+                }
+                alert(successMessage);
                 showView('join-view');
-                document.getElementById('join-room-name').value = roomName;
-                document.getElementById('join-user-id').value = creatorId;
             } else {
                 alert(`Error: ${await response.text()}`);
             }
@@ -163,10 +153,7 @@
             const roomName = document.getElementById('join-room-name').value.trim();
             const userId = document.getElementById('join-user-id').value.trim();
             if (!roomName || !userId) return alert("Room Name and User ID are required.");
-            
-            roomState.roomName = roomName;
-            roomState.userId = userId;
-            
+            roomState = { roomName, userId, isE2EE: false, encryptionKey: null };
             startChatSession();
         };
         async function startChatSession() {
@@ -180,11 +167,9 @@
                     throw new Error("You are not authorized to join this room.");
                 }
                 if (roomState.isE2EE) {
-                    const password = prompt("This room is end-to-end encrypted. Please enter the encryption key:");
-                    if (!password) throw new Error("Encryption key is required.");
-                    const personalSalt = prompt("Please enter your unique salt phrase (case-sensitive):");
-                    if (!personalSalt) throw new Error("A personal salt phrase is required.");
-                    roomState.encryptionKey = await deriveKey(password, personalSalt);
+                    const sharedKey = prompt("This room is E2EE. Please enter the shared encryption key:");
+                    if (!sharedKey) throw new Error("Encryption key is required.");
+                    roomState.encryptionKey = await importKey(sharedKey);
                 }
                 chatRoomTitle.textContent = `Room: ${roomState.roomName}`;
                 showView('chat-view');
@@ -232,11 +217,7 @@
                 payload = { ciphertext: ciphertext };
             }
             const apiURL = `${API_BASE}/api/message?room=${roomState.roomName}&userId=${roomState.userId}`;
-            await fetch(apiURL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-            });
+            await fetch(apiURL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
             sendBtn.disabled = false;
             input.focus();
         }
@@ -261,4 +242,3 @@
     </script>
 </body>
 </html>
-
