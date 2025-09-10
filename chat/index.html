@@ -190,7 +190,7 @@
             const wsURL = `${WS_BASE}/websocket?room=${roomState.roomName}&userId=${roomState.userId}`;
             const ws = new WebSocket(wsURL);
             ws.addEventListener("open", () => {
-                appendMessage({ user: "System", message: `Live connection established.` });
+                appendMessage({ userId: "[System]", message: `Live connection established.` });
                 input.disabled = false;
                 sendBtn.disabled = false;
                 input.focus();
@@ -201,7 +201,7 @@
                 appendMessage(data);
             });
             ws.addEventListener("close", () => {
-                appendMessage({ user: "System", message: "Live connection lost. Please refresh." });
+                appendMessage({ userId: "[System]", message: "Live connection lost. Please refresh." });
                 input.disabled = true;
                 sendBtn.disabled = true;
             });
