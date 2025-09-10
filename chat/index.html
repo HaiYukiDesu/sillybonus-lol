@@ -174,7 +174,7 @@
                 chatRoomTitle.textContent = `Room: ${roomState.roomName}`;
                 showView('chat-view');
                 messagesDiv.innerHTML = '';
-                appendMessage({ user: "System", message: `Joining room '${roomState.roomName}'...` });
+                appendMessage({ userId: "[System]", message: `Joining room '${roomState.roomName}'...` });
                 const historyRes = await fetch(`${API_BASE}/api/history?room=${roomState.roomName}`);
                 const history = await historyRes.json();
                 for (const msg of history) {
