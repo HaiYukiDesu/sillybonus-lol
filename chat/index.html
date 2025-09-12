@@ -4,245 +4,41 @@
     <meta charset="UTF-8" />
     <title>Silly Chat</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,'Open Sans','Helvetica Neue',sans-serif;margin:0;background-color:#f4f4f5;color:#18181b;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:1em;box-sizing:border-box}
-        .app-container{max-width:600px;width:100%}
-        .view{display:none}
-        .view.active{display:block}
-        .card{background:white;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.1);padding:2em}
-        h1,h2{text-align:center;color:#3f3f46}
-        button{border:none;background-color:#6d28d9;color:white;padding:1em;border-radius:8px;cursor:pointer;transition:background-color .2s;font-size:1em;font-weight:500;width:100%;margin-top:.5em}
-        button:disabled{background-color:#a78bfa;cursor:not-allowed}
-        .input-group{margin-bottom:1.2em}
-        label{display:block;margin-bottom:.5em;font-weight:500;color:#52525b}
-        input[type="text"],input[type="password"]{width:100%;padding:.8em;border:1px solid #d4d4d8;border-radius:6px;box-sizing:border-box;font-size:1em}
-        .key-display{background-color:#f4f4f5;padding:1em;border-radius:6px;word-wrap:break-word;font-family:monospace;margin-top:1em;border:1px solid #e4e4e7;text-align:center}
-        #chat-view .card{display:flex;flex-direction:column;height:80vh;max-height:800px}
-        #messages{flex-grow:1;overflow-y:scroll;padding:.5em;border:1px solid #e4e4e7;border-radius:8px;margin-bottom:1em}
-        .message-line{margin-bottom:8px;max-width:90%}
-        .message-line.system{text-align:center;color:#71717a;font-style:italic;max-width:100%}
-        .message-line.own{margin-left:auto;text-align:right}
-        .message-bubble{padding:.6em 1em;border-radius:18px;display:inline-block;max-width:100%}
-        .message-bubble.other{background-color:#f4f4f5;text-align:left}
-        .message-bubble.own{background-color:#ede9fe;color:#5b21b6}
-        .msg-meta{font-size:.75em;color:#71717a;margin-bottom:.2em}
-        .input-area{display:flex}
-        #input{flex-grow:1;border:1px solid #d4d4d8;border-radius:8px 0 0 8px;padding:.8em;font-size:1em}
-        #send{width:auto;border-radius:0 8px 8px 0;margin-top:0}
-    </style>
+    <style>body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,'Open Sans','Helvetica Neue',sans-serif;margin:0;background-color:#f4f4f5;color:#18181b;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:1em;box-sizing:border-box}.app-container{max-width:600px;width:100%}.view{display:none}.view.active{display:block}.card{background:white;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.1);padding:2em}h1,h2{text-align:center;color:#3f3f46}button{border:none;background-color:#6d28d9;color:white;padding:1em;border-radius:8px;cursor:pointer;transition:background-color .2s;font-size:1em;font-weight:500;width:100%;margin-top:.5em}button:disabled{background-color:#a78bfa;cursor:not-allowed}.input-group{margin-bottom:1.2em}label{display:block;margin-bottom:.5em;font-weight:500;color:#52525b}input[type="text"],input[type="password"]{width:100%;padding:.8em;border:1px solid #d4d4d8;border-radius:6px;box-sizing:border-box;font-size:1em}.key-display{background-color:#f4f4f5;padding:1em;border-radius:6px;word-wrap:break-word;font-family:monospace;margin-top:1em;border:1px solid #e4e4e7;text-align:center}#chat-view .card{display:flex;flex-direction:column;height:80vh;max-height:800px}#messages{flex-grow:1;overflow-y:scroll;padding:.5em;border:1px solid #e4e4e7;border-radius:8px;margin-bottom:1em}.message-line{margin-bottom:8px;max-width:90%}.message-line.system{text-align:center;color:#71717a;font-style:italic;max-width:100%}.message-line.own{margin-left:auto;text-align:right}.message-bubble{padding:.6em 1em;border-radius:18px;display:inline-block;max-width:100%}.message-bubble.other{background-color:#f4f4f5;text-align:left}.message-bubble.own{background-color:#ede9fe;color:#5b21b6}.msg-meta{font-size:.75em;color:#71717a;margin-bottom:.2em}.input-area{display:flex}#input{flex-grow:1;border:1px solid #d4d4d8;border-radius:8px 0 0 8px;padding:.8em;font-size:1em}#send{width:auto;border-radius:0 8px 8px 0;margin-top:0}</style>
 </head>
 <body>
 <div class="app-container">
-    <div id="login-view" class="view active card">
-        <form id="login-form">
-            <h2>Login to Silly Chat</h2>
-            <div class="input-group">
-                <label for="login-user">Username</label>
-                <input type="text" id="login-user" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false">
-            </div>
-            <div class="input-group">
-                <label for="login-pass">Password</label>
-                <input type="password" id="login-pass" autocomplete="current-password" autocorrect="off" autocapitalize="none" spellcheck="false">
-            </div>
-            <button id="login-btn" type="submit">Login</button>
-            <p>No account? <a href="#" id="show-register-link">Register here</a></p>
-        </form>
-    </div>
-    <div id="register-view" class="view card">
-        <form id="register-form">
-            <h2>Register</h2>
-            <div class="input-group">
-                <label for="register-user">Username</label>
-                <input type="text" id="register-user" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false">
-            </div>
-            <div class="input-group">
-                <label for="register-pass">Password</label>
-                <input type="password" id="register-pass" autocomplete="new-password" autocorrect="off" autocapitalize="none" spellcheck="false">
-            </div>
-            <div class="input-group">
-                <label for="register-referral">Referral Code</label>
-                <input type="text" id="register-referral" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
-            </div>
-            <button id="register-btn" type="submit">Register</button>
-            <p>Already have an account? <a href="#" id="show-login-link">Login here</a></p>
-        </form>
-    </div>
-    <div id="main-view" class="view card">
-        <h2 id="welcome-message"></h2>
-        <button id="show-create-btn">Create a New Room</button>
-        <button id="show-join-btn">Join an Existing Room</button>
-    </div>
-    <div id="create-view" class="view card">
-        <h2>Create New Room</h2>
-        <div class="input-group"><label for="create-room-name">Room Name</label><input type="text" id="create-room-name" placeholder="my-secret-room" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"></div>
-        <div class="input-group"><label><input type="checkbox" id="create-e2ee"> Enable E2EE</label></div>
-        <button id="create-room-btn">Create Room</button>
-        <button class="back-button">Back to Main</button>
-    </div>
-    <div id="join-view" class="view card">
-        <h2>Join Room</h2>
-        <div class="input-group"><label for="join-room-name">Room Name</label><input type="text" id="join-room-name" placeholder="my-secret-room" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"></div>
-        <button id="join-room-btn">Join Room</button>
-        <button class="back-button">Back to Main</button>
-    </div>
-    <div id="chat-view" class="view">
-        <div class="card">
-            <h2 id="chat-header"></h2>
-            <div id="messages"></div>
-            <form id="message-form" class="input-area">
-                <input id="input" placeholder="Type a message..." autocomplete="off" disabled/>
-                <button id="send" type="submit" disabled>Send</button>
-            </form>
-            <button class="back-button">Leave Room</button>
-        </div>
-    </div>
+    <div id="login-view" class="view active card"><form id="login-form"><h2>Login to Silly Chat</h2><div class="input-group"><label for="login-user">Username</label><input type="text" id="login-user" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false"></div><div class="input-group"><label for="login-pass">Password</label><input type="password" id="login-pass" autocomplete="current-password" autocorrect="off" autocapitalize="none" spellcheck="false"></div><button id="login-btn" type="submit">Login</button><p>No account? <a href="#" id="show-register-link">Register here</a></p></form></div>
+    <div id="register-view" class="view card"><form id="register-form"><h2>Register</h2><div class="input-group"><label for="register-user">Username</label><input type="text" id="register-user" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false"></div><div class="input-group"><label for="register-pass">Password</label><input type="password" id="register-pass" autocomplete="new-password" autocorrect="off" autocapitalize="none" spellcheck="false"></div><div class="input-group"><label for="register-referral">Referral Code</label><input type="text" id="register-referral" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"></div><button id="register-btn" type="submit">Register</button><p>Already have an account? <a href="#" id="show-login-link">Login here</a></p></form></div>
+    <div id="main-view" class="view card"><h2 id="welcome-message"></h2><button id="show-create-btn">Create a New Room</button><button id="show-join-btn">Join an Existing Room</button></div>
+    <div id="create-view" class="view card"><h2>Create New Room</h2><div class="input-group"><label for="create-room-name">Room Name</label><input type="text" id="create-room-name" placeholder="my-secret-room" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"></div><div class="input-group"><label><input type="checkbox" id="create-e2ee"> Enable E2EE</label></div><button id="create-room-btn">Create Room</button><button class="back-button">Back to Main</button></div>
+    <div id="join-view" class="view card"><h2>Join Room</h2><div class="input-group"><label for="join-room-name">Room Name</label><input type="text" id="join-room-name" placeholder="my-secret-room" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"></div><button id="join-room-btn">Join Room</button><button class="back-button">Back to Main</button></div>
+    <div id="chat-view" class="view"><div class="card"><h2 id="chat-header"></h2><div id="messages"></div><form id="message-form" class="input-area"><input id="input" placeholder="Type a message..." autocomplete="off" disabled/><button id="send" type="submit" disabled>Send</button></form><button class="back-button">Leave Room</button></div></div>
 </div>
 <script>
-    const API_BASE = "https://chat.itbon.us";
-    const WS_BASE = "wss://chat.itbon.us";
-    let state = { username: null, currentRoom: null, ws: null, encryptionKey: null };
-    const views = { login: document.getElementById('login-view'), register: document.getElementById('register-view'), main: document.getElementById('main-view'), create: document.getElementById('create-view'), join: document.getElementById('join-view'), chat: document.getElementById('chat-view'), };
-    function showView(viewName) { Object.values(views).forEach(v => v.classList.remove('active')); views[viewName].classList.add('active'); }
-    async function apiRequest(endpoint, options = {}) {
-        options.credentials = 'include';
-        options.headers = { ...options.headers, 'Content-Type': 'application/json' };
-        const response = await fetch(`${API_BASE}${endpoint}`, options);
-        if (!response.ok) { const errorText = await response.text(); throw new Error(errorText || `HTTP error! status: ${response.status}`); }
-        return response;
-    }
-    async function encryptMessage(key, message) {
-        const iv = crypto.getRandomValues(new Uint8Array(12));
-        const encodedMessage = new TextEncoder().encode(message);
-        const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, encodedMessage);
-        return { iv: btoa(String.fromCharCode.apply(null, iv)), ciphertext: btoa(String.fromCharCode.apply(null, new Uint8Array(ciphertext))), };
-    }
-    async function decryptMessage(key, data) {
-        try {
-            const iv = Uint8Array.from(atob(data.iv), c => c.charCodeAt(0));
-            const ciphertext = Uint8Array.from(atob(data.ciphertext), c => c.charCodeAt(0));
-            const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, ciphertext);
-            return new TextDecoder().decode(decrypted);
-        } catch (e) { return "Failed to decrypt message."; }
-    }
-    function appendMessage(data) {
-        const messagesDiv = views.chat.querySelector('#messages');
-        const div = document.createElement("div");
-        const isOwn = data.userId === state.username;
-        div.className = 'message-line' + (data.userId === 'System' ? ' system' : isOwn ? ' own' : '');
-        const time = data.timestamp ? new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-        if (data.userId === 'System') {
-            div.innerHTML = `<div class="message-bubble other">${data.message}</div>`;
-        } else {
-            div.innerHTML = `<div class="msg-meta">${isOwn ? 'You' : data.userId}・${time}</div><div class="message-bubble ${isOwn ? 'own' : 'other'}">${data.decryptedText || '...'}</div>`;
-        }
-        messagesDiv.appendChild(div);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
-    async function handleIncomingMessage(data) {
-        let decryptedText = data.message;
-        if (data.is_encrypted && state.encryptionKey) {
-            decryptedText = await decryptMessage(state.encryptionKey, { iv: data.message, ciphertext: data.ciphertext });
-        } else if (data.is_encrypted && !state.encryptionKey) {
-            decryptedText = "[Encrypted message - key not available]";
-        }
-        appendMessage({ ...data, decryptedText });
-    }
-    async function connectWebSocket() {
-        if (state.ws) state.ws.close();
-        const wsURL = `${WS_BASE}/websocket?room=${encodeURIComponent(state.currentRoom)}`;
-        state.ws = new WebSocket(wsURL);
-        state.ws.onopen = () => { views.chat.querySelector('#input').disabled = false; views.chat.querySelector('#send').disabled = false; };
-        state.ws.onmessage = (event) => handleIncomingMessage(JSON.parse(event.data));
+    const API_BASE = "https://chat.itbon.us"; const WS_BASE = "wss://chat.itbon.us"; let state = { username: null, currentRoom: null, ws: null, encryptionKey: null }; const views = { login: document.getElementById('login-view'), register: document.getElementById('register-view'), main: document.getElementById('main-view'), create: document.getElementById('create-view'), join: document.getElementById('join-view'), chat: document.getElementById('chat-view'), }; function showView(viewName) { Object.values(views).forEach(v => v.classList.remove('active')); views[viewName].classList.add('active'); }
+    async function apiRequest(endpoint, options = {}) { options.credentials = 'include'; options.headers = { ...options.headers, 'Content-Type': 'application/json' }; const response = await fetch(`${API_BASE}${endpoint}`, options); if (!response.ok) { const errorText = await response.text(); throw new Error(errorText || `HTTP error! status: ${response.status}`); } return response; }
+    async function encryptMessage(key, message) { const iv = crypto.getRandomValues(new Uint8Array(12)); const encodedMessage = new TextEncoder().encode(message); const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, encodedMessage); return { iv: btoa(String.fromCharCode.apply(null, iv)), ciphertext: btoa(String.fromCharCode.apply(null, new Uint8Array(ciphertext))), }; }
+    async function decryptMessage(key, data) { try { const iv = Uint8Array.from(atob(data.iv), c => c.charCodeAt(0)); const ciphertext = Uint8Array.from(atob(data.ciphertext), c => c.charCodeAt(0)); const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, ciphertext); return new TextDecoder().decode(decrypted); } catch (e) { return "Failed to decrypt message."; } }
+    function appendMessage(data) { const messagesDiv = views.chat.querySelector('#messages'); const div = document.createElement("div"); const isOwn = data.userId === state.username; div.className = 'message-line' + (data.userId === 'System' ? ' system' : isOwn ? ' own' : ''); const time = data.timestamp ? new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''; if (data.userId === 'System') { div.innerHTML = `<div class="message-bubble other">${data.message}</div>`; } else { div.innerHTML = `<div class="msg-meta">${isOwn ? 'You' : data.userId}・${time}</div><div class="message-bubble ${isOwn ? 'own' : 'other'}">${data.decryptedText || '...'}</div>`; } messagesDiv.appendChild(div); messagesDiv.scrollTop = messagesDiv.scrollHeight; }
+    async function handleIncomingMessage(data) { let decryptedText = data.message; if (data.is_encrypted && state.encryptionKey) { decryptedText = await decryptMessage(state.encryptionKey, { iv: data.message, ciphertext: data.ciphertext }); } else if (data.is_encrypted && !state.encryptionKey) { decryptedText = "[Encrypted message - key not available]"; } appendMessage({ ...data, decryptedText }); }
+    async function connectWebSocket() { if (state.ws) state.ws.close(); const wsURL = `${WS_BASE}/websocket?room=${encodeURIComponent(state.currentRoom)}`; state.ws = new WebSocket(wsURL); state.ws.onopen = () => { views.chat.querySelector('#input').disabled = false; views.chat.querySelector('#send').disabled = false; };
+        state.ws.onmessage = (event) => { const data = JSON.parse(event.data); if (data.type === 'ping') { state.ws.send(JSON.stringify({ type: 'pong' })); return; } handleIncomingMessage(data); };
         state.ws.onclose = () => appendMessage({ userId: 'System', message: 'Connection lost.' });
     }
-    async function loadHistory() {
-        const response = await apiRequest(`/api/history?room=${encodeURIComponent(state.currentRoom)}`);
-        const history = await response.json();
-        for (const msg of history) { await handleIncomingMessage(msg); }
-    }
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = views.login.querySelector('#login-user').value;
-        const password = views.login.querySelector('#login-pass').value;
-        try {
-            const response = await apiRequest('/api/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) });
-            const data = await response.json();
-            state.username = data.username;
-            views.main.querySelector('#welcome-message').textContent = `Welcome, ${state.username}!`;
-            showView('main');
-        } catch (error) { alert(`Login failed: ${error.message}`); }
-    });
-    document.getElementById('register-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = views.register.querySelector('#register-user').value;
-        const password = views.register.querySelector('#register-pass').value;
-        const referralCode = views.register.querySelector('#register-referral').value;
-        try {
-            await apiRequest('/api/auth/register', { method: 'POST', body: JSON.stringify({ username, password, referralCode }) });
-            alert('Registration successful! Please login.');
-            showView('login');
-        } catch (error) { alert(`Registration failed: ${error.message}`); }
-    });
+    async function loadHistory() { const response = await apiRequest(`/api/history?room=${encodeURIComponent(state.currentRoom)}`); const history = await response.json(); for (const msg of history) { await handleIncomingMessage(msg); } }
+    document.getElementById('login-form').addEventListener('submit', async (e) => { e.preventDefault(); const username = views.login.querySelector('#login-user').value; const password = views.login.querySelector('#login-pass').value; try { const response = await apiRequest('/api/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }); const data = await response.json(); state.username = data.username; views.main.querySelector('#welcome-message').textContent = `Welcome, ${state.username}!`; showView('main'); } catch (error) { alert(`Login failed: ${error.message}`); } });
+    document.getElementById('register-form').addEventListener('submit', async (e) => { e.preventDefault(); const username = views.register.querySelector('#register-user').value; const password = views.register.querySelector('#register-pass').value; const referralCode = views.register.querySelector('#register-referral').value; try { await apiRequest('/api/auth/register', { method: 'POST', body: JSON.stringify({ username, password, referralCode }) }); alert('Registration successful! Please login.'); showView('login'); } catch (error) { alert(`Registration failed: ${error.message}`); } });
     document.getElementById('message-form').addEventListener('submit', (e) => { e.preventDefault(); sendMessage(); });
     document.getElementById('show-register-link').onclick = (e) => { e.preventDefault(); showView('register'); };
     document.getElementById('show-login-link').onclick = (e) => { e.preventDefault(); showView('login'); };
-    document.querySelectorAll('.back-button').forEach(btn => btn.onclick = () => showView('main'));
+    document.querySelectorAll('.back-button').forEach(btn => btn.onclick = () => { if (state.ws) { state.ws.close(); state.ws = null; } showView('main'); });
     document.getElementById('show-create-btn').onclick = () => showView('create');
     document.getElementById('show-join-btn').onclick = () => showView('join');
-    document.getElementById('create-room-btn').onclick = async () => {
-        const roomName = views.create.querySelector('#create-room-name').value;
-        const e2ee_enabled = views.create.querySelector('#create-e2ee').checked;
-        let encryption_key_b64 = null;
-        if (e2ee_enabled) {
-            const key = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
-            const exported = await crypto.subtle.exportKey("raw", key);
-            encryption_key_b64 = btoa(String.fromCharCode.apply(null, new Uint8Array(exported)));
-        }
-        try {
-            await apiRequest('/api/create-room', { method: 'POST', body: JSON.stringify({ roomName, e2ee_enabled, encryption_key_b64 }) });
-            alert(`Room '${roomName}' created!`);
-            if (e2ee_enabled) alert(`IMPORTANT: Securely share this key:\n\n${encryption_key_b64}`);
-            showView('main');
-        } catch (error) { alert(`Failed to create room: ${error.message}`); }
-    };
-    document.getElementById('join-room-btn').onclick = async () => {
-        const roomName = views.join.querySelector('#join-room-name').value;
-        try {
-            const roomInfo = await (await apiRequest(`/api/room-info?room=${encodeURIComponent(roomName)}`)).json();
-            if (!roomInfo) throw new Error("Room does not exist.");
-            if (roomInfo.e2ee_enabled) {
-                const keyData = await (await apiRequest(`/api/room/key?room=${encodeURIComponent(roomName)}`)).json();
-                const keyBytes = Uint8Array.from(atob(keyData.key), c => c.charCodeAt(0));
-                state.encryptionKey = await crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, true, ["encrypt", "decrypt"]);
-            } else { state.encryptionKey = null; }
-            state.currentRoom = roomName;
-            views.chat.querySelector('#chat-header').textContent = `Room: ${roomName}`;
-            views.chat.querySelector('#messages').innerHTML = '';
-            showView('chat');
-            await loadHistory();
-            await connectWebSocket();
-        } catch (error) { alert(`Failed to join room: ${error.message}`); }
-    };
-    const sendMessage = async () => {
-        const messageInput = views.chat.querySelector('#input');
-        const message = messageInput.value.trim();
-        if (!message) return;
-        messageInput.value = '';
-        let payload = { message };
-        if (state.encryptionKey) {
-            const encrypted = await encryptMessage(state.encryptionKey, message);
-            payload = { ciphertext: encrypted.ciphertext, iv: encrypted.iv };
-        }
-        await apiRequest(`/api/message?room=${encodeURIComponent(state.currentRoom)}`, { method: 'POST', body: JSON.stringify(payload) });
-    };
-    (async function checkSession() {
-        try {
-            const data = await (await apiRequest('/api/auth/me')).json();
-            state.username = data.username;
-            views.main.querySelector('#welcome-message').textContent = `Welcome, ${state.username}!`;
-            showView('main');
-        } catch (e) { showView('login'); }
-    })();
+    document.getElementById('create-room-btn').onclick = async () => { const roomName = views.create.querySelector('#create-room-name').value; const e2ee_enabled = views.create.querySelector('#create-e2ee').checked; let encryption_key_b64 = null; if (e2ee_enabled) { const key = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]); const exported = await crypto.subtle.exportKey("raw", key); encryption_key_b64 = btoa(String.fromCharCode.apply(null, new Uint8Array(exported))); } try { await apiRequest('/api/create-room', { method: 'POST', body: JSON.stringify({ roomName, e2ee_enabled, encryption_key_b64 }) }); alert(`Room '${roomName}' created!`); if (e2ee_enabled) alert(`IMPORTANT: Securely share this key:\n\n${encryption_key_b64}`); showView('main'); } catch (error) { alert(`Failed to create room: ${error.message}`); } };
+    document.getElementById('join-room-btn').onclick = async () => { const roomName = views.join.querySelector('#join-room-name').value; try { const roomInfo = await (await apiRequest(`/api/room-info?room=${encodeURIComponent(roomName)}`)).json(); if (!roomInfo) throw new Error("Room does not exist."); if (roomInfo.e2ee_enabled) { const keyData = await (await apiRequest(`/api/room/key?room=${encodeURIComponent(roomName)}`)).json(); const keyBytes = Uint8Array.from(atob(keyData.key), c => c.charCodeAt(0)); state.encryptionKey = await crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, true, ["encrypt", "decrypt"]); } else { state.encryptionKey = null; } state.currentRoom = roomName; views.chat.querySelector('#chat-header').textContent = `Room: ${roomName}`; views.chat.querySelector('#messages').innerHTML = ''; showView('chat'); await loadHistory(); await connectWebSocket(); } catch (error) { alert(`Failed to join room: ${error.message}`); } };
+    const sendMessage = async () => { const messageInput = views.chat.querySelector('#input'); const message = messageInput.value.trim(); if (!message) return; messageInput.value = ''; let payload = { message }; if (state.encryptionKey) { const encrypted = await encryptMessage(state.encryptionKey, message); payload = { ciphertext: encrypted.ciphertext, iv: encrypted.iv }; } await apiRequest(`/api/message?room=${encodeURIComponent(state.currentRoom)}`, { method: 'POST', body: JSON.stringify(payload) }); };
+    (async function checkSession() { try { const data = await (await apiRequest('/api/auth/me')).json(); state.username = data.username; views.main.querySelector('#welcome-message').textContent = `Welcome, ${state.username}!`; showView('main'); } catch (e) { showView('login'); } })();
 </script>
 </body>
 </html>
