@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>silly meter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Bangers&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Comic Neue', cursive;
+            background-color: #fff0f5;
+            background-image: radial-gradient(#ff69b4 1px, transparent 1px);
+            background-size: 20px 20px;
+            overflow-x: hidden;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><text y="15" font-size="15">🪿</text></svg>'), auto;
+        }
+        .title { font-family: 'Bangers', cursive; letter-spacing: 2px; }
+        @keyframes float { 0% { transform: translateY(0) rotate(0); opacity: 0; } 10% { opacity: 1; } 100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; } }
+        @keyframes spin { 0% { transform: rotate(0); } 100% { transform: rotate(360deg); } }
+        @keyframes glow { 0%, 100% { box-shadow: 0 0 5px #ff69b4, 0 0 10px #ff69b4; } 50% { box-shadow: 0 0 20px #ff00ff, 0 0 30px #ff00ff; } }
+        @keyframes rainbow { 0% { color: red; } 20% { color: orange; } 40% { color: yellow; } 60% { color: green; } 80% { color: blue; } 100% { color: purple; } }
+        .float-obj { position: fixed; pointer-events: none; z-index: 0; font-size: 2rem; bottom: -50px; }
+        .spin-click { animation: spin 0.5s linear; }
+        .btn-glow { animation: glow 1.5s infinite alternate; }
+        .cert-bg { background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z' fill='%239C92AC' fill-opacity='0.1'/%3E%3C/g%3E%3C/svg%3E"); }
+        .confetti { position: absolute; width: 10px; height: 10px; background: red; animation: float 3s linear forwards; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div id="distractions"></div>
+
+    <div id="app" class="relative z-10 w-full max-w-2xl bg-white border-4 border-pink-400 rounded-3xl shadow-[8px_8px_0px_0px_rgba(255,105,180,1)] p-6 md:p-10 transition-all">
+        
+        <div id="start" class="text-center space-y-6">
+            <h1 class="text-6xl title text-pink-500 drop-shadow-md">SILLY METER 9000</h1>
+            <div class="text-6xl my-4 animate-bounce">🤪</div>
+            <p class="text-xl font-bold">are you a <span class="text-purple-500">functioning adult</span> or a <span class="text-pink-500">sentient shitpost</span>?</p>
+            <input type="text" id="nameinput" placeholder="enter name if u want" class="w-full p-3 border-2 border-dashed border-gray-400 rounded-xl text-center text-xl font-bold bg-gray-50 focus:outline-none">
+            <button onclick="begin()" class="btn-glow bg-pink-500 text-white text-2xl font-bold py-4 px-10 rounded-full hover:bg-pink-400 transition-all mt-4 transform hover:scale-105">LET'S GET SILLY</button>
+        </div>
+
+        <div id="quiz" class="hidden space-y-6">
+            <div class="flex justify-between items-center mb-4">
+                <span id="progress" class="font-bold text-pink-400">1/20</span>
+                <div class="w-full max-w-[200px] bg-gray-200 rounded-full h-4 ml-4 border-2 border-gray-300">
+                    <div id="bar" class="bg-gradient-to-r from-pink-400 to-purple-500 h-full rounded-full transition-all duration-300" style="width: 5%"></div>
+                </div>
+            </div>
+
+            <div class="min-h-[100px] flex items-center justify-center">
+                <h2 id="qtext" class="text-3xl font-bold text-gray-800 text-center leading-tight">...</h2>
+            </div>
+
+            <div class="flex justify-center my-2 h-16">
+                <span id="emojireact" class="text-6xl cursor-pointer hover:scale-110 transition-transform" onclick="spinemoji(this)">🐱</span>
+            </div>
+
+            <div class="grid gap-3">
+                <button onclick="ans(5)" class="btn-glow w-full p-4 bg-green-100 border-2 border-green-400 rounded-xl text-left hover:scale-[1.02] transition-transform">
+                    <span class="text-2xl mr-2">🤩</span><span class="font-bold text-green-800">SO TRUE BESTIE</span>
+                </button>
+                <button onclick="ans(4)" class="w-full p-4 bg-blue-100 border-2 border-blue-400 rounded-xl text-left hover:scale-[1.02] transition-transform">
+                    <span class="text-2xl mr-2">😌</span><span class="font-bold text-blue-800">YEAH KINDA</span>
+                </button>
+                <button onclick="ans(3)" class="w-full p-4 bg-yellow-100 border-2 border-yellow-400 rounded-xl text-left hover:scale-[1.02] transition-transform">
+                    <span class="text-2xl mr-2">😐</span><span class="font-bold text-yellow-800">ONLY ON TUESDAYS</span>
+                </button>
+                <button onclick="ans(2)" class="w-full p-4 bg-orange-100 border-2 border-orange-400 rounded-xl text-left hover:scale-[1.02] transition-transform">
+                    <span class="text-2xl mr-2">🤔</span><span class="font-bold text-orange-800">NAH</span>
+                </button>
+                <button onclick="ans(1)" class="w-full p-4 bg-red-100 border-2 border-red-400 rounded-xl text-left hover:scale-[1.02] transition-transform">
+                    <span class="text-2xl mr-2">🧐</span><span class="font-bold text-red-800">I AM A FUNCTIONING ADULT</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="load" class="hidden text-center py-20">
+            <div class="text-8xl animate-[spin_0.5s_linear_infinite] inline-block mb-8">🌀</div>
+            <h2 class="text-3xl font-bold" style="animation: rainbow 1s linear infinite">CALCULATING SILLINESS...</h2>
+        </div>
+
+        <div id="res" class="hidden text-center">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">ANALYSIS COMPLETE</h2>
+            <div id="cert" class="cert-bg bg-white border-8 border-double border-yellow-400 p-6 rounded-lg shadow-2xl transform rotate-1 mb-8 relative">
+                <div class="absolute top-2 right-2 border-4 border-red-500 rounded-full p-2 w-20 h-20 flex items-center justify-center transform -rotate-12 opacity-80">
+                    <span class="font-bold text-xs text-red-500 text-center uppercase">official<br>silly<br>biz</span>
+                </div>
+                <h3 class="title text-4xl text-gray-900 border-b-2 border-gray-800 pb-2">Certificate of Silliness</h3>
+                <p class="text-xl italic text-gray-600 mt-4">this certifies that</p>
+                <h2 id="rname" class="text-4xl font-bold text-indigo-600 my-2 border-b-2 border-dashed border-gray-300 inline-block px-4">user</h2>
+                <p class="text-xl italic text-gray-600">is diagnosed with</p>
+                <h3 id="rtitle" class="text-3xl font-bold mt-2 uppercase">diagnosis</h3>
+                <p id="rdesc" class="text-md font-bold bg-yellow-100 p-2 rounded inline-block mt-2 transform -rotate-1">desc</p>
+                <div class="mt-6 flex justify-between text-xs font-bold uppercase">
+                    <div class="text-left">
+                        <div id="rdate" class="font-serif normal-case text-sm mb-1 ml-2"></div>
+                        <div class="border-t border-gray-800 pt-1 w-24">date</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="h-6 font-serif text-blue-800 italic text-lg opacity-60">dr. silly</div>
+                        <div class="border-t border-gray-800 pt-1 w-24 ml-auto">signature</div>
+                    </div>
+                </div>
+            </div>
+            <div class="space-x-4">
+                <button onclick="restart()" class="btn-glow bg-purple-500 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:scale-105 transition-transform">AGAIN</button>
+                <button onclick="dl()" class="btn-glow bg-blue-500 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:scale-105 transition-transform">SAVE 📸</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let q = [
+            "my primary method of problem-solving involves staring at the ceiling until the issue goes away.",
+            "i have arguably too many beverages on my desk right now.",
+            "if left unsupervised, i will make weird noises just to feel something.",
+            "i have a strong urge to bite my friends as a form of affection.",
+            "my posture resembles a shrimp or a folded lawn chair.",
+            "the 'voices' in my head aren't mean, they are just playing circus music.",
+            "i oscillate rapidly between 'i am a god' and 'i am a crumbling crouton'.",
+            "i frequently zone out so hard that i legally leave this dimension.",
+            "if asked a serious question, my immediate reaction is nonsense.",
+            "i am not 'mentally ill', i am just 'whimsymaxxing'.",
+            "i have used 'i’m just a little guy' as a valid legal defense.",
+            "spreading minor misinformation on the internet sounds fun.",
+            "i communicate primarily through keysmashes and cat pics.",
+            "i would choose a shiny rock over saving the economy.",
+            "i often start a sentence and forget where i am going halfway.",
+            "i spiritually identify with raccoons or possums.",
+            "i have considered disappearing into the woods.",
+            "3:00 am is the prime time to reorganize the room.",
+            "tax fraud isn't a crime; it is a meme format.",
+            "i am holding onto sanity by a single thread which is a funny video."
+        ];
+        let dbox = [
+            {min:0, max:35, t:"THE NPC", d:"terminal normality. boring.", c:"text-gray-500"},
+            {min:36, max:60, t:"WEEKEND SILLY", d:"part-time gremlin. safe.", c:"text-blue-500"},
+            {min:61, max:85, t:"CERTIFIED SILLY GOOSE", d:"high risk of whimsy. vibe check passed.", c:"text-pink-500"},
+            {min:86, max:100, t:"UNCONTAINABLE ENTITY", d:"RUN. sentient shitpost detected.", c:"text-red-600"}
+        ];
+        let emo = ["🐈","🤪","🤡","👻","🐛","🪿","🍄","✨","🦷","👁️","🧀","🐸","🦴","🛹"];
+        let idx = 0;
+        let score = 0;
+        let user = "anon";
+
+        function distract() {
+            for(let i=0; i<3; i++){
+                let el = document.createElement('div');
+                el.classList.add('float-obj');
+                el.innerText = emo[Math.floor(Math.random()*emo.length)];
+                el.style.left = Math.random()*100 + 'vw';
+                el.style.animation = `float ${2+Math.random()*4}s linear forwards`;
+                document.getElementById('distractions').appendChild(el);
+                setTimeout(()=>el.remove(), 6000);
+            }
+        }
+        setInterval(distract, 800);
+
+        function begin() {
+            let inp = document.getElementById('nameinput').value;
+            if(inp.trim()) user = inp;
+            document.getElementById('start').classList.add('hidden');
+            document.getElementById('quiz').classList.remove('hidden');
+            render();
+        }
+
+        function render() {
+            document.getElementById('progress').innerText = `${idx+1}/20`;
+            document.getElementById('bar').style.width = `${((idx)/20)*100}%`;
+            document.getElementById('qtext').innerText = q[idx];
+            document.getElementById('emojireact').innerText = emo[Math.floor(Math.random()*emo.length)];
+            document.getElementById('emojireact').classList.remove('spin-click');
+        }
+
+        function spinemoji(el) {
+            el.classList.remove('spin-click');
+            void el.offsetWidth;
+            el.classList.add('spin-click');
+        }
+
+        function ans(val) {
+            score += val;
+            idx++;
+            if(idx < 20) render();
+            else done();
+        }
+
+        function done() {
+            document.getElementById('quiz').classList.add('hidden');
+            document.getElementById('load').classList.remove('hidden');
+            setTimeout(res, 2000);
+        }
+
+        function res() {
+            document.getElementById('load').classList.add('hidden');
+            document.getElementById('res').classList.remove('hidden');
+            let final = dbox.find(x => score >= x.min && score <= x.max) || dbox[0];
+            document.getElementById('rname').innerText = user;
+            
+            // Set Date
+            document.getElementById('rdate').innerText = new Date().toLocaleDateString();
+
+            let rt = document.getElementById('rtitle');
+            rt.innerText = final.t;
+            rt.className = `text-3xl font-bold mt-2 uppercase ${final.c}`;
+            document.getElementById('rdesc').innerText = final.d;
+            
+            for(let i=0; i<60; i++) {
+                let c = document.createElement('div');
+                c.classList.add('confetti');
+                c.style.left = Math.random()*100+'vw';
+                c.style.backgroundColor = `hsl(${Math.random()*360},100%,50%)`;
+                c.style.top = '-10px';
+                c.style.animationDuration = Math.random()*2+1+'s';
+                document.body.appendChild(c);
+                setTimeout(()=>c.remove(),3000);
+            }
+        }
+
+        function dl() {
+            html2canvas(document.getElementById('cert')).then(canvas => {
+                let link = document.createElement('a');
+                link.download = 'silly_certificate.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+
+        function restart() {
+            score = 0;
+            idx = 0;
+            document.getElementById('res').classList.add('hidden');
+            document.getElementById('start').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
