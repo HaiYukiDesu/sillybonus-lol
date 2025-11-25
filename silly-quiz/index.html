@@ -35,7 +35,7 @@
     <div id="app" class="relative z-10 w-full max-w-2xl bg-white border-4 border-pink-400 rounded-3xl shadow-[8px_8px_0px_0px_rgba(255,105,180,1)] p-6 md:p-10 transition-all">
         
         <div id="start" class="text-center space-y-6">
-            <h1 class="text-6xl title text-pink-500 drop-shadow-md">SILLY METER 9000</h1>
+            <h1 class="text-6xl title text-pink-500 drop-shadow-md">SILLY METER!!</h1>
             <div class="text-6xl my-4 animate-bounce">🤪</div>
             <p class="text-xl font-bold">are you a <span class="text-purple-500">functioning adult</span> or a <span class="text-pink-500">sentient shitpost</span>?</p>
             <input type="text" id="nameinput" placeholder="enter name if u want" class="w-full p-3 border-2 border-dashed border-gray-400 rounded-xl text-center text-xl font-bold bg-gray-50 focus:outline-none">
@@ -107,14 +107,13 @@
             </div>
             <div class="space-x-4">
                 <button onclick="restart()" class="btn-glow bg-purple-500 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:scale-105 transition-transform">AGAIN</button>
-                <button onclick="dl()" class="btn-glow bg-blue-500 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:scale-105 transition-transform">SAVE 📸</button>
             </div>
         </div>
     </div>
 
     <script>
         let q = [
-            "my primary method of problem-solving involves staring at the ceiling until the issue goes away.",
+            "my primary method of problem solving involves staring at the ceiling until the issue goes away.",
             "i have arguably too many beverages on my desk right now.",
             "if left unsupervised, i will make weird noises just to feel something.",
             "i have a strong urge to bite my friends as a form of affection.",
@@ -197,10 +196,11 @@
         function res() {
             document.getElementById('load').classList.add('hidden');
             document.getElementById('res').classList.remove('hidden');
+            document.body.style.cursor = 'auto';
+            
             let final = dbox.find(x => score >= x.min && score <= x.max) || dbox[0];
             document.getElementById('rname').innerText = user;
             
-            // Set Date
             document.getElementById('rdate').innerText = new Date().toLocaleDateString();
 
             let rt = document.getElementById('rtitle');
@@ -232,6 +232,7 @@
         function restart() {
             score = 0;
             idx = 0;
+            document.body.style.cursor = '';
             document.getElementById('res').classList.add('hidden');
             document.getElementById('start').classList.remove('hidden');
         }
