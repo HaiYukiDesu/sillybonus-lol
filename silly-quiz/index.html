@@ -1,9 +1,15 @@
 <!DOCTYPE html>
+<meta content="Silly Meter!!" property="og:title" />
+<meta content="Are you a functioning adult or a silly person? Take the unhinged quiz to find out! 🤪" property="og:description" />
+<meta content="https://sillybonus.lol/silly-quiz" property="og:url" />
+<meta content="https://sillybonus.lol/silly-quiz/waw.webp" property="og:image" />
+<meta content="#ff69b4" data-react-helmet="true" name="theme-color" />
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>silly meter</title>
+    <title>Silly Meter!!</title>
+    <link rel="icon" href="https://sillybonus.lol/silly-quiz/waw.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Bangers&display=swap" rel="stylesheet">
@@ -15,6 +21,13 @@
             background-size: 20px 20px;
             overflow-x: hidden;
             cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><text y="15" font-size="15">🪿</text></svg>'), auto;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        input {
+            user-select: text;
+            -webkit-user-select: text;
         }
         .title { font-family: 'Bangers', cursive; letter-spacing: 2px; }
         @keyframes float { 0% { transform: translateY(0) rotate(0); opacity: 0; } 10% { opacity: 1; } 100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; } }
