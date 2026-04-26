@@ -1,5 +1,5 @@
 let isMuted = true;
-let audio = new Audio('https://cdn.sillybonus.lol/assets/backgroundsound.mp3');
+let audio = new Audio('https://cdn.itbon.us/assets/backgroundsound.mp3');
 const overlay = document.getElementById('click-to-enter-overlay');
 const musicToggle = document.getElementById('music-toggle');
 
@@ -72,7 +72,7 @@ document.getElementById('go-back-button').addEventListener('click', () => {
 });
 
 document.getElementById('no-hello-link').addEventListener('click', () => {
-    window.open('https://sillybonus.lol/nohello', '_blank');
+    window.open('https://itbon.us/nohello', '_blank');
 });
 
 document.addEventListener('mousemove', (e) => {
